@@ -3,11 +3,12 @@
 ## État d'Avancement du Projet
 - **Phase Actuelle :** Kick-Off & Initialisation de la structure du projet.
 - **Dernières Actions :**
-  - Alignement sur l'architecture globale (Clean Architecture, MVVM, Room, Jetpack Compose, Material 3, Media3 ExoPlayer).
+  - Pivot architectural : réécriture du projet Android de Kotlin à Java.
+  - Remplacement de Jetpack Compose par le système de vues XML classique et View Binding pour compatibilité Java native.
   - Définition du package Android global : `com.aeonflux.app`.
-  - Initialisation de la structure de répertoires `.antigravity/` pour gouverner le développement autonome de l'agent.
+  - Configuration de la gouvernance en Java Android.
 
 ## Prochaines Étapes
-1. Définir et implémenter la configuration Gradle racine et le module principal `app/`.
-2. Créer l'arborescence des packages Java/Kotlin et générer le code squelette pour `core-database`, `core-network`, et `core-media`.
-3. Lancer les premiers tests unitaires et intégrer les outils de validation automatique (Ktlint, Detekt).
+1. Mettre à jour les fichiers Gradle de build pour enlever Kotlin et ajouter le support de Java/Annotation Processors.
+2. Créer l'arborescence des packages Java et générer le code squelette pour `core-database`, `core-network`, et `core-media` en Java.
+3. Intégrer les layouts XML de base.
