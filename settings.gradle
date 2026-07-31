@@ -14,4 +14,4 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "aeonflux-android"
-include(":app")
+include ':app'
