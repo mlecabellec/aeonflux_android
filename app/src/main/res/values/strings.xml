@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">AeonFlux</string>
+    <string name="title_home">Home Feed</string>
+    <string name="title_rss">RSS Reader</string>
+    <string name="title_podcasts">Podcasts</string>
+    <string name="title_bluesky">Bluesky</string>
+    <string name="add_feed">Add New Feed</string>
+    <string name="feed_url_label">Feed URL / Handle</string>
+    <string name="feed_type_label">Feed Type</string>
+    <string name="btn_submit">Submit</string>
+    <string name="btn_cancel">Cancel</string>
+</resources>
