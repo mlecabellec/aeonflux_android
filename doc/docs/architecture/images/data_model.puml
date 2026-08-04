@@ -1,0 +1,97 @@
+@startuml
+skinparam linetype ortho
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+entity "sources" as sources {
+  * id : TEXT <<PK>>
+  --
+  * url : TEXT
+  * title : TEXT
+  description : TEXT
+  icon_url : TEXT
+  * source_type : TEXT
+  refresh_interval_minutes : INTEGER
+  last_refreshed_at : INTEGER
+  is_contributed_to_gae : INTEGER
+}
+
+entity "articles" as articles {
+  * id : TEXT <<PK>>
+  --
+  * source_id : TEXT <<FK>>
+  * guid : TEXT
+  * title : TEXT
+  content_raw : TEXT
+  content_cleaned : TEXT
+  author : TEXT
+  published_at : INTEGER
+  * url : TEXT
+  is_read : INTEGER
+  is_bookmarked : INTEGER
+  media_url : TEXT
+  media_duration_ms : INTEGER
+  playback_position_ms : INTEGER
+  is_downloaded : INTEGER
+  local_media_path : TEXT
+  cached_html_path : TEXT
+  ai_summary : TEXT
+  transcript_text : TEXT
+}
+
+entity "keywords" as keywords {
+  * id : TEXT <<PK>>
+  --
+  * keyword : TEXT <<UNIQUE>>
+}
+
+entity "labels" as labels {
+  * id : TEXT <<PK>>
+  --
+  * name : TEXT <<UNIQUE>>
+  color : TEXT
+}
+
+entity "article_keywords" as article_keywords {
+  * article_id : TEXT <<PK, FK>>
+  * keyword_id : TEXT <<PK, FK>>
+}
+
+entity "article_labels" as article_labels {
+  * article_id : TEXT <<PK, FK>>
+  * label_id : TEXT <<PK, FK>>
+}
+
+entity "properties" as properties {
+  * id : INTEGER <<PK, AUTOINCREMENT>>
+  --
+  * entity_type : TEXT
+  * entity_id : TEXT
+  * property_key : TEXT
+  property_value : TEXT
+  * data_type : TEXT
+}
+
+entity "source_secrets" as source_secrets {
+  * source_id : TEXT <<PK, FK>>
+  * secret_key : TEXT <<PK>>
+  --
+  * encrypted_value : TEXT
+  * iv : TEXT
+}
+
+entity "settings" as settings {
+  * key : TEXT <<PK>>
+  --
+  value : TEXT
+}
+
+sources ||--o{ articles : "source_id"
+articles ||--o{ article_keywords : "article_id"
+keywords ||--o{ article_keywords : "keyword_id"
+articles ||--o{ article_labels : "article_id"
+labels ||--o{ article_labels : "label_id"
+sources ||--o{ source_secrets : "source_id"
+
+@enduml

@@ -33,6 +33,7 @@ nav:
       - "CS-0030 Java Coding Rules": architecture/CS-0030.md
   - Architecture:
       - Architecture Index: architecture/README.md
+      - Data Model: architecture/data_model.md
   - Governance:
       - Governance Index: governance/README.md
   - Specifications:
@@ -44,3 +45,4 @@ nav:
       - Tasks:
           - "TSK-20260804-001 Documentation Setup": project/tasks/TSK-20260804-001.md
           - "TSK-20260804-002 Initialize Components": project/tasks/TSK-20260804-002.md
+          - "TSK-20260804-003 Initialize SQLite Room Database": project/tasks/TSK-20260804-003.md
