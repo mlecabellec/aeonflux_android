@@ -14,3 +14,9 @@
 .cxx
 local.properties
 /app/build
+
+# Documentation build directories
+/.cache/
+/doc/site/
+/doc/documentation.pdf
+

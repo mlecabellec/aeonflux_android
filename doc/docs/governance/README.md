@@ -10,6 +10,7 @@ This directory details coding rules and static quality checks.
 
 ## Related Configuration Files
 
-* [Java Android Rules](../../.antigravity/rules/01-java-android-rules.md) - The rules governing Antigravity development.
-* [Clean Code Rules](../../.antigravity/rules/03-architecture-clean-code.md) - Design pattern guidelines.
-* [Testing Rules](../../.antigravity/rules/04-testing-enforcement.md) - Quality targets and standards.
+* [Java Android Rules](../../../.antigravity/rules/01-java-android-rules.md) - The rules governing Antigravity development.
+* [Clean Code Rules](../../../.antigravity/rules/03-architecture-clean-code.md) - Design pattern guidelines.
+* [Testing Rules](../../../.antigravity/rules/04-testing-enforcement.md) - Quality targets and standards.
+

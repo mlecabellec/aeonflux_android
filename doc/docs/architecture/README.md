@@ -11,3 +11,5 @@ This directory details the client architecture.
 ## Documents
 
 * [clean_code_rules.md](../governance/README.md) - Design patterns and governance rules.
+* [rules_index.md](file:///home/m/git/aeonflux_android/doc/docs/architecture/rules_index.md) - Project constraints, coding standards, and AI agent rules.
+
