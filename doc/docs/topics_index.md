@@ -32,3 +32,4 @@ Focuses on general code quality, AI agent guidelines, and Java coding standards.
 Focuses on repository build commands, project roadmap milestones, and task logs.
 - [Project Tasks Overview](project/milestones/README.md): Milestones roadmap.
 - [Active Documentation Task](project/tasks/TSK-20260804-001.md): First documentation set up task.
+- [MainActivity UI & Feeds Tree Task](project/tasks/TSK-20260805-001.md): MainActivity dual drawer, gestures, ItemViewActivity, and Settings task.

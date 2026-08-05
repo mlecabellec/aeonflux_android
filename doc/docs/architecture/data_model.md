@@ -126,6 +126,7 @@ entity "articles" as articles {
   published_at : INTEGER
   * url : TEXT
   is_read : INTEGER
+  is_new : INTEGER
   is_bookmarked : INTEGER
   media_url : TEXT
   media_duration_ms : INTEGER
@@ -220,6 +221,7 @@ Stores items or articles ingested from sources.
 * **`published_at`** (INTEGER): Publish timestamp.
 * **`url`** (TEXT): Target link/website.
 * **`is_read`** (INTEGER): Read status.
+* **`is_new`** (INTEGER): New item status flag (1 for new, 0 otherwise).
 * **`is_bookmarked`** (INTEGER): Favorite status.
 * **`media_url`** (TEXT): Direct audio stream URL (for Podcasts).
 * **`media_duration_ms`** (INTEGER): Duration of audio.
