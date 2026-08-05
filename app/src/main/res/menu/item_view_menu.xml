@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  [CS-0010] ItemViewActivity Options Menu Layout
+  Reference: REQ-00060 / TSK-20260805-001
+-->
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_download"
+        android:title="Download Article &amp; Attachments"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_webview_normal"
+        android:title="Open in WebView (Normal)"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_webview_private"
+        android:title="Open in WebView (Private)"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_associate_label"
+        android:title="Associate to Label"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_toggle_starred"
+        android:title="Star Article"
+        app:showAsAction="never" />
+
+</menu>

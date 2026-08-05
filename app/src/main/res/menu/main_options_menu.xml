@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  [CS-0010] [CS-0020] Options Menu Layout for 3-Dots Action Button
+  Reference: REQ-00050 / TSK-20260805-001
+-->
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_refresh"
+        android:title="Force Refresh Feeds"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_toggle_label_grouping"
+        android:title="Toggle Grouping by Labels"
+        android:checkable="true"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_sort_sources"
+        android:title="Sort Feeds/Sources"
+        app:showAsAction="never">
+        <menu>
+            <item
+                android:id="@+id/action_sort_source_alpha_asc"
+                android:title="Alphabetical (ASC)" />
+            <item
+                android:id="@+id/action_sort_source_alpha_desc"
+                android:title="Alphabetical (DESC)" />
+            <item
+                android:id="@+id/action_sort_source_fetch_asc"
+                android:title="Last Fetch (ASC)" />
+            <item
+                android:id="@+id/action_sort_source_fetch_desc"
+                android:title="Last Fetch (DESC)" />
+            <item
+                android:id="@+id/action_sort_source_article_asc"
+                android:title="Last Article (ASC)" />
+            <item
+                android:id="@+id/action_sort_source_article_desc"
+                android:title="Last Article (DESC)" />
+        </menu>
+    </item>
+
+    <item
+        android:id="@+id/action_filter_sort_items"
+        android:title="Sort &amp; Filter Items"
+        app:showAsAction="never">
+        <menu>
+            <item
+                android:id="@+id/action_sort_item_timestamp_asc"
+                android:title="Timestamp (ASC)" />
+            <item
+                android:id="@+id/action_sort_item_timestamp_desc"
+                android:title="Timestamp (DESC)" />
+            <item
+                android:id="@+id/action_toggle_read_items"
+                android:title="Show Read Items"
+                android:checkable="true"
+                android:checked="true" />
+        </menu>
+    </item>
+
+    <item
+        android:id="@+id/action_settings"
+        android:title="Settings"
+        app:showAsAction="never" />
+
+</menu>

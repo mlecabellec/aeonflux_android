@@ -49,6 +49,24 @@ public interface SourceDao {
     @Query("DELETE FROM sources WHERE id = :sourceId")
     void deleteSourceById(String sourceId);
 
+    @Query("SELECT s.*, (SELECT COUNT(*) FROM articles a WHERE a.source_id = s.id AND a.is_read = 0) as unreadCount, (SELECT COALESCE(MAX(a.published_at), 0) FROM articles a WHERE a.source_id = s.id) as lastArticleAt FROM sources s ORDER BY s.title ASC")
+    List<com.aeonflux.app.core.database.models.SourceWithUnreadCount> getSourcesWithUnreadCountAlphabeticalAsc();
+
+    @Query("SELECT s.*, (SELECT COUNT(*) FROM articles a WHERE a.source_id = s.id AND a.is_read = 0) as unreadCount, (SELECT COALESCE(MAX(a.published_at), 0) FROM articles a WHERE a.source_id = s.id) as lastArticleAt FROM sources s ORDER BY s.title DESC")
+    List<com.aeonflux.app.core.database.models.SourceWithUnreadCount> getSourcesWithUnreadCountAlphabeticalDesc();
+
+    @Query("SELECT s.*, (SELECT COUNT(*) FROM articles a WHERE a.source_id = s.id AND a.is_read = 0) as unreadCount, (SELECT COALESCE(MAX(a.published_at), 0) FROM articles a WHERE a.source_id = s.id) as lastArticleAt FROM sources s ORDER BY s.last_refreshed_at ASC")
+    List<com.aeonflux.app.core.database.models.SourceWithUnreadCount> getSourcesWithUnreadCountLastFetchAsc();
+
+    @Query("SELECT s.*, (SELECT COUNT(*) FROM articles a WHERE a.source_id = s.id AND a.is_read = 0) as unreadCount, (SELECT COALESCE(MAX(a.published_at), 0) FROM articles a WHERE a.source_id = s.id) as lastArticleAt FROM sources s ORDER BY s.last_refreshed_at DESC")
+    List<com.aeonflux.app.core.database.models.SourceWithUnreadCount> getSourcesWithUnreadCountLastFetchDesc();
+
+    @Query("SELECT s.*, (SELECT COUNT(*) FROM articles a WHERE a.source_id = s.id AND a.is_read = 0) as unreadCount, (SELECT COALESCE(MAX(a.published_at), 0) FROM articles a WHERE a.source_id = s.id) as lastArticleAt FROM sources s ORDER BY lastArticleAt ASC")
+    List<com.aeonflux.app.core.database.models.SourceWithUnreadCount> getSourcesWithUnreadCountLastArticleAsc();
+
+    @Query("SELECT s.*, (SELECT COUNT(*) FROM articles a WHERE a.source_id = s.id AND a.is_read = 0) as unreadCount, (SELECT COALESCE(MAX(a.published_at), 0) FROM articles a WHERE a.source_id = s.id) as lastArticleAt FROM sources s ORDER BY lastArticleAt DESC")
+    List<com.aeonflux.app.core.database.models.SourceWithUnreadCount> getSourcesWithUnreadCountLastArticleDesc();
+
     @Query("DELETE FROM sources")
     void deleteAllSources();
 }

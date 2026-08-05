@@ -63,6 +63,9 @@ public class ArticleEntity {
     @ColumnInfo(name = "is_read")
     public int isRead = 0;
 
+    @ColumnInfo(name = "is_new")
+    public int isNew = 1;
+
     @ColumnInfo(name = "is_bookmarked")
     public int isBookmarked = 0;
 

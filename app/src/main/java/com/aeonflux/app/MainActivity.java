@@ -1,21 +1,177 @@
+/*
+ * [CS-0010] [CS-0020] [CS-0030] Quality Standards, AI Rules & Java Coding Rules Compliance.
+ * Reference: REQ-00010 / REQ-00020 / REQ-00030 / REQ-00040 / REQ-00050 / TSK-20260805-001
+ * MainActivity with Dual Drawers, Expandable Tree Adapter, Swipe Gestures, and 3-dots Menu.
+ */
 package com.aeonflux.app;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.widget.ExpandableListView;
+import android.widget.TextView;
+import android.widget.Toast;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
-import com.aeonflux.app.databinding.ActivityMainBinding;
+import androidx.appcompat.widget.Toolbar;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
+import com.aeonflux.app.core.database.entities.ArticleEntity;
+import com.aeonflux.app.core.database.entities.SourceEntity;
+import com.aeonflux.app.core.database.models.SourceGroupDTO;
+import com.aeonflux.app.core.database.models.SourceWithUnreadCount;
+import com.aeonflux.app.ui.ItemViewActivity;
+import com.aeonflux.app.ui.SettingsActivity;
+import com.aeonflux.app.ui.adapters.ArticleAdapter;
+import com.aeonflux.app.ui.adapters.SourceTreeAdapter;
+
 import dagger.hilt.android.AndroidEntryPoint;
+import java.util.ArrayList;
+import java.util.List;
 
 @AndroidEntryPoint
 public class MainActivity extends AppCompatActivity {
 
-    private ActivityMainBinding binding;
+    private DrawerLayout drawerLayout;
+    private SwipeRefreshLayout swipeRefreshLayout;
+    private RecyclerView recyclerArticles;
+    private ExpandableListView expandableListView;
+    private TextView quickSummaryText;
+
+    private ArticleAdapter articleAdapter;
+    private SourceTreeAdapter sourceTreeAdapter;
+    private final List<ArticleEntity> sampleArticles = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        binding = ActivityMainBinding.inflate(getLayoutInflater());
-        setContentView(binding.getRoot());
-        
-        binding.welcomeText.setText("Welcome to AeonFlux (Java Edition)!");
+        setContentView(R.layout.activity_main);
+
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        drawerLayout = findViewById(R.id.drawer_layout);
+        swipeRefreshLayout = findViewById(R.id.swipe_refresh);
+        recyclerArticles = findViewById(R.id.recycler_articles);
+        expandableListView = findViewById(R.id.expandable_sources_list);
+        quickSummaryText = findViewById(R.id.text_quick_summary);
+
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+            this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawerLayout.addDrawerListener(toggle);
+        toggle.syncState();
+
+        setupArticleList();
+        setupSourceTree();
+        setupGestures();
+    }
+
+    private void setupArticleList() {
+        recyclerArticles.setLayoutManager(new LinearLayoutManager(this));
+        articleAdapter = new ArticleAdapter();
+        recyclerArticles.setAdapter(articleAdapter);
+
+        articleAdapter.setOnArticleClickListener(article -> {
+            quickSummaryText.setText("Selected: " + article.title + "\n\n" + (article.aiSummary != null ? article.aiSummary : article.title));
+
+            Intent intent = new Intent(MainActivity.this, ItemViewActivity.class);
+            intent.putExtra(ItemViewActivity.EXTRA_ARTICLE_ID, article.id);
+            intent.putExtra(ItemViewActivity.EXTRA_TITLE, article.title);
+            intent.putExtra(ItemViewActivity.EXTRA_SUMMARY, article.contentCleaned);
+            intent.putExtra(ItemViewActivity.EXTRA_URL, article.url);
+            intent.putExtra(ItemViewActivity.EXTRA_AUTHOR, article.author);
+            intent.putExtra(ItemViewActivity.EXTRA_PUBLISHED_AT, article.publishedAt);
+            startActivity(intent);
+        });
+
+        loadSampleData();
+    }
+
+    private void setupSourceTree() {
+        sourceTreeAdapter = new SourceTreeAdapter(this);
+        expandableListView.setAdapter(sourceTreeAdapter);
+
+        List<SourceGroupDTO> groups = new ArrayList<>();
+        SourceGroupDTO defaultGroup = new SourceGroupDTO("grp_1", "All Sources", "#FF0000");
+        SourceEntity s1 = new SourceEntity("src_1", "https://news.ycombinator.com/rss", "Hacker News", "Tech news", null, "RSS", 60, System.currentTimeMillis(), 0);
+        defaultGroup.addSource(new SourceWithUnreadCount(s1, 3, System.currentTimeMillis()));
+
+        groups.add(defaultGroup);
+        sourceTreeAdapter.setGroups(groups);
+
+        expandableListView.setOnChildClickListener((parent, v, groupPosition, childPosition, id) -> {
+            SourceWithUnreadCount child = (SourceWithUnreadCount) sourceTreeAdapter.getChild(groupPosition, childPosition);
+            Toast.makeText(MainActivity.this, "Selected feed: " + child.source.title, Toast.LENGTH_SHORT).show();
+            drawerLayout.closeDrawers();
+            return true;
+        });
+    }
+
+    private void setupGestures() {
+        swipeRefreshLayout.setOnRefreshListener(() -> {
+            Toast.makeText(MainActivity.this, "Refreshing feeds...", Toast.LENGTH_SHORT).show();
+            swipeRefreshLayout.setRefreshing(false);
+        });
+
+        ItemTouchHelper.SimpleCallback swipeCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                int pos = viewHolder.getAdapterPosition();
+                if (pos != RecyclerView.NO_POSITION) {
+                    ArticleEntity removed = sampleArticles.remove(pos);
+                    articleAdapter.setArticles(new ArrayList<>(sampleArticles));
+                    Toast.makeText(MainActivity.this, "Marked read: " + removed.title, Toast.LENGTH_SHORT).show();
+                }
+            }
+        };
+
+        new ItemTouchHelper(swipeCallback).attachToRecyclerView(recyclerArticles);
+    }
+
+    private void loadSampleData() {
+        ArticleEntity a1 = new ArticleEntity("art_1", "src_1", "guid_1", "AeonFlux Android Architecture Overview", "<p>Content</p>", "Clean architecture overview for offline-first feed ingestion.", "Aeon Team", System.currentTimeMillis(), "https://aeonflux.dev/arch");
+        a1.aiSummary = "Summary of architecture overview.";
+
+        ArticleEntity a2 = new ArticleEntity("art_2", "src_1", "guid_2", "Reactive MVVM & Room Persistence", "<p>Content 2</p>", "Detailed guide on LiveData, Room DAOs, and SQLite state binding.", "Data Specialist", System.currentTimeMillis() - 3600000, "https://aeonflux.dev/room");
+        a2.isBookmarked = 1;
+
+        sampleArticles.clear();
+        sampleArticles.add(a1);
+        sampleArticles.add(a2);
+        articleAdapter.setArticles(new ArrayList<>(sampleArticles));
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main_options_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_refresh) {
+            Toast.makeText(this, "Force refreshing feeds...", Toast.LENGTH_SHORT).show();
+            return true;
+        } else if (id == R.id.action_settings) {
+            startActivity(new Intent(this, SettingsActivity.class));
+            return true;
+        } else if (id == R.id.action_toggle_label_grouping) {
+            item.setChecked(!item.isChecked());
+            Toast.makeText(this, item.isChecked() ? "Grouping by Labels enabled" : "Grouping by Labels disabled", Toast.LENGTH_SHORT).show();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }
