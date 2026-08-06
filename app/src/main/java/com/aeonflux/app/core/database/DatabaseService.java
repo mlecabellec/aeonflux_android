@@ -141,9 +141,20 @@ public class DatabaseService {
         return appDatabase.sourceDao().getAllSourcesLiveData();
     }
 
+    public LiveData<List<com.aeonflux.app.core.database.models.SourceWithUnreadCount>> getSourcesWithUnreadCountLiveData() {
+        return appDatabase.sourceDao().getSourcesWithUnreadCountLiveData();
+    }
+
     public LiveData<List<ArticleEntity>> getAllArticlesLiveData() {
         return appDatabase.articleDao().getAllArticlesLiveData();
     }
+
+    public LiveData<List<ArticleEntity>> getArticlesForSourceLiveData(String sourceId) {
+        Objects.requireNonNull(sourceId, "sourceId must not be null");
+        return appDatabase.articleDao().getArticlesForSourceLiveData(sourceId);
+    }
+
+
 
     public List<SourceEntity> getAllSources() {
         return appDatabase.sourceDao().getAllSources();

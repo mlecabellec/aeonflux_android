@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<ruleset name="AeonFlux PMD Ruleset"
+    xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 http://pmd.sourceforge.net/ruleset_2_0_0.xsd">
+
+    <description>AeonFlux Android PMD Ruleset</description>
+
+    <rule ref="category/java/bestpractices.xml">
+        <exclude name="GuardLogStatement" />
+    </rule>
+    <rule ref="category/java/codestyle.xml">
+        <exclude name="AtLeastOneConstructor" />
+        <exclude name="LocalVariableCouldBeFinal" />
+        <exclude name="MethodArgumentCouldBeFinal" />
+        <exclude name="OnlyOneReturn" />
+    </rule>
+    <rule ref="category/java/design.xml" />
+    <rule ref="category/java/errorprone.xml" />
+    <rule ref="category/java/performance.xml" />
+</ruleset>

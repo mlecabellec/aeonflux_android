@@ -17,7 +17,9 @@ import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.lifecycle.LiveData;
 import androidx.recyclerview.widget.ItemTouchHelper;
+
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -100,6 +102,8 @@ public class MainActivity extends AppCompatActivity {
     @javax.inject.Inject
     com.aeonflux.app.core.database.DatabaseService databaseService;
 
+    private String selectedSourceId = null;
+
     private void setupArticleList() {
         recyclerArticles.setLayoutManager(new LinearLayoutManager(this));
         articleAdapter = new ArticleAdapter();
@@ -118,26 +122,48 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        databaseService.getAllArticlesLiveData().observe(this, articles -> {
+        observeArticles();
+    }
+
+    private androidx.lifecycle.Observer<List<ArticleEntity>> currentArticleObserver = null;
+    private LiveData<List<ArticleEntity>> currentArticlesLiveData = null;
+
+    private void observeArticles() {
+        if (currentArticlesLiveData != null && currentArticleObserver != null) {
+            currentArticlesLiveData.removeObserver(currentArticleObserver);
+        }
+
+        currentArticleObserver = articles -> {
             if (articles != null && !articles.isEmpty()) {
                 articleAdapter.setArticles(articles);
             } else {
-                loadSampleData();
+                articleAdapter.setArticles(new ArrayList<>());
             }
-        });
+        };
+
+        if (selectedSourceId == null) {
+            currentArticlesLiveData = databaseService.getAllArticlesLiveData();
+        } else {
+            currentArticlesLiveData = databaseService.getArticlesForSourceLiveData(selectedSourceId);
+        }
+
+        currentArticlesLiveData.observe(this, currentArticleObserver);
     }
+
+
+
 
     private void setupSourceTree() {
         sourceTreeAdapter = new SourceTreeAdapter(this);
         expandableListView.setAdapter(sourceTreeAdapter);
 
-        databaseService.getAllSourcesLiveData().observe(this, sources -> {
+        databaseService.getSourcesWithUnreadCountLiveData().observe(this, sourcesWithUnread -> {
             List<SourceGroupDTO> groups = new ArrayList<>();
             SourceGroupDTO defaultGroup = new SourceGroupDTO("grp_1", "All Feeds & Sources", "#3B82F6");
 
-            if (sources != null && !sources.isEmpty()) {
-                for (SourceEntity s : sources) {
-                    defaultGroup.addSource(new SourceWithUnreadCount(s, 0, s.lastRefreshedAt != null ? s.lastRefreshedAt : System.currentTimeMillis()));
+            if (sourcesWithUnread != null && !sourcesWithUnread.isEmpty()) {
+                for (SourceWithUnreadCount swu : sourcesWithUnread) {
+                    defaultGroup.addSource(swu);
                 }
             } else {
                 SourceEntity s1 = new SourceEntity("src_1", "https://news.ycombinator.com/rss", "Hacker News", "Tech news", null, "RSS", 60, System.currentTimeMillis(), 0);
@@ -150,11 +176,20 @@ public class MainActivity extends AppCompatActivity {
 
         expandableListView.setOnChildClickListener((parent, v, groupPosition, childPosition, id) -> {
             SourceWithUnreadCount child = (SourceWithUnreadCount) sourceTreeAdapter.getChild(groupPosition, childPosition);
-            Toast.makeText(MainActivity.this, "Selected feed: " + child.source.title, Toast.LENGTH_SHORT).show();
+            if (child != null && child.source != null) {
+                selectedSourceId = child.source.id;
+                Toast.makeText(MainActivity.this, "Filtering items for: " + child.source.title, Toast.LENGTH_SHORT).show();
+                observeArticles();
+                if (recyclerArticles != null) {
+                    recyclerArticles.scrollToPosition(0);
+                }
+            }
             drawerLayout.closeDrawers();
             return true;
         });
     }
+
+
 
 
     private void setupGestures() {

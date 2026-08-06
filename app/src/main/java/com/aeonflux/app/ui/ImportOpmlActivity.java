@@ -67,8 +67,14 @@ public class ImportOpmlActivity extends AppCompatActivity {
         btnSelectFile.setOnClickListener(v -> filePickerLauncher.launch("*/*"));
     }
 
+    private static final java.util.logging.Logger LOGGER = java.util.logging.Logger.getLogger(ImportOpmlActivity.class.getName());
+
     private void onFileSelected(Uri uri) {
-        if (uri == null) return;
+        if (uri == null) {
+            LOGGER.warning("onFileSelected invoked with null URI");
+            return;
+        }
+        LOGGER.info("User selected OPML import file URI: " + uri);
         appendLog("File selected: " + uri.getPath());
         btnSelectFile.setEnabled(false);
         progressBar.setVisibility(ProgressBar.VISIBLE);
@@ -76,7 +82,12 @@ public class ImportOpmlActivity extends AppCompatActivity {
         Executors.newSingleThreadExecutor().execute(() -> {
             try (InputStream inputStream = getContentResolver().openInputStream(uri)) {
                 if (inputStream == null) {
-                    runOnUiThread(() -> appendLog("Error: Unable to open selected file."));
+                    LOGGER.severe("Unable to open InputStream for URI: " + uri);
+                    runOnUiThread(() -> {
+                        appendLog("Error: Unable to open selected file.");
+                        btnSelectFile.setEnabled(true);
+                        progressBar.setVisibility(ProgressBar.GONE);
+                    });
                     return;
                 }
 
@@ -85,19 +96,26 @@ public class ImportOpmlActivity extends AppCompatActivity {
                 OpmlTreeFlattener flattener = new OpmlTreeFlattener();
                 List<OpmlItem> allFeeds = flattener.extractAllFeeds(items);
 
+                LOGGER.info("Parsed " + allFeeds.size() + " feed nodes from selected OPML file.");
                 runOnUiThread(() -> appendLog("Parsed " + allFeeds.size() + " feeds from OPML hierarchy. Processing database insertion & labeling..."));
 
                 int imported = 0;
                 int skipped = 0;
 
                 for (OpmlItem feed : allFeeds) {
-                    if (processFeedItem(feed)) {
-                        imported++;
-                    } else {
-                        skipped++;
+                    if (feed != null) {
+                        try {
+                            if (processFeedItem(feed)) {
+                                imported++;
+                            } else {
+                                skipped++;
+                            }
+                        } catch (Exception ex) {
+                            LOGGER.log(java.util.logging.Level.WARNING, "Error processing OPML feed item: " + feed.getTitle(), ex);
+                            skipped++;
+                        }
                     }
                 }
-
 
                 int finalImported = imported;
                 int finalSkipped = skipped;
@@ -111,6 +129,7 @@ public class ImportOpmlActivity extends AppCompatActivity {
                 });
 
             } catch (Exception e) {
+                LOGGER.log(java.util.logging.Level.SEVERE, "Fatal error executing OPML import task", e);
                 runOnUiThread(() -> {
                     progressBar.setVisibility(ProgressBar.GONE);
                     btnSelectFile.setEnabled(true);
@@ -121,54 +140,75 @@ public class ImportOpmlActivity extends AppCompatActivity {
     }
 
     private boolean processFeedItem(OpmlItem item) {
+        if (item == null) {
+            return false;
+        }
         String url = item.getXmlUrl();
-        if (url == null || url.isEmpty()) return false;
-
-        SourceEntity existing = databaseService.getSourceByUrl(url);
-        if (existing != null) {
-            runOnUiThread(() -> appendLog("Skipping duplicate: " + item.getTitle() + " (" + url + ")"));
+        if (url == null || url.trim().isEmpty()) {
             return false;
         }
 
-        String id = "src_" + UUID.randomUUID().toString().substring(0, 8);
-        SourceEntity source = new SourceEntity(id, url, item.getTitle(), item.getText(), null, "RSS", 60, System.currentTimeMillis(), 0);
-        databaseService.insertSource(source);
+        try {
+            SourceEntity existing = databaseService.getSourceByUrl(url);
+            if (existing != null) {
+                runOnUiThread(() -> appendLog("Skipping duplicate: " + item.getTitle() + " (" + url + ")"));
+                return false;
+            }
 
-        if (!item.getCategory().isEmpty()) {
-            String labelId = "lbl_" + item.getCategory().toLowerCase().replaceAll("[^a-z0-9]", "_");
-            LabelEntity label = new LabelEntity(labelId, item.getCategory(), "#3B82F6");
-            databaseService.insertLabel(label);
-        }
+            String id = "src_" + UUID.randomUUID().toString().substring(0, 8);
+            SourceEntity source = new SourceEntity(id, url, item.getTitle(), item.getText(), null, "RSS", 60, System.currentTimeMillis(), 0);
+            databaseService.insertSource(source);
 
-        Executors.newSingleThreadExecutor().execute(() -> {
-            try {
-                URL urlObj = new URL(url);
-                HttpURLConnection conn = (HttpURLConnection) urlObj.openConnection();
-                conn.setConnectTimeout(5000);
-                conn.setReadTimeout(5000);
-                if (conn.getResponseCode() >= 200 && conn.getResponseCode() < 300) {
-                    try (InputStream is = conn.getInputStream()) {
-                        com.aeonflux.app.core.fetch.RssFeedParser parser = new com.aeonflux.app.core.fetch.RssFeedParser();
-                        List<SourceEntity> sources = databaseService.getAllSources();
-                        List<ArticleEntity> articles = parser.parseFeedItems(is, id);
-                        for (ArticleEntity article : articles) {
-                            databaseService.insertArticle(article);
+            if (item.getCategory() != null && !item.getCategory().trim().isEmpty()) {
+                String labelId = "lbl_" + item.getCategory().toLowerCase().replaceAll("[^a-z0-9]", "_");
+                LabelEntity label = new LabelEntity(labelId, item.getCategory(), "#3B82F6");
+                databaseService.insertLabel(label);
+            }
+
+            Executors.newSingleThreadExecutor().execute(() -> {
+                HttpURLConnection conn = null;
+                try {
+                    URL urlObj = new URL(url);
+                    conn = (HttpURLConnection) urlObj.openConnection();
+                    conn.setConnectTimeout(5000);
+                    conn.setReadTimeout(5000);
+                    if (conn.getResponseCode() >= 200 && conn.getResponseCode() < 300) {
+                        try (InputStream is = conn.getInputStream()) {
+                            com.aeonflux.app.core.fetch.RssFeedParser parser = new com.aeonflux.app.core.fetch.RssFeedParser();
+                            List<ArticleEntity> articles = parser.parseFeedItems(is, id);
+                            if (articles != null) {
+                                for (ArticleEntity article : articles) {
+                                    if (article != null) {
+                                        databaseService.insertArticle(article);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } catch (Exception ex) {
+                    LOGGER.log(java.util.logging.Level.FINE, "Initial background fetch failed during import for feed: " + url, ex);
+                } finally {
+                    if (conn != null) {
+                        try {
+                            conn.disconnect();
+                        } catch (Exception ignored) {
                         }
                     }
                 }
-                conn.disconnect();
-            } catch (Exception ignored) {
-            }
-        });
+            });
 
-        runOnUiThread(() -> appendLog("Imported: " + item.getTitle()));
-        return true;
+            runOnUiThread(() -> appendLog("Imported: " + item.getTitle()));
+            return true;
+        } catch (Exception e) {
+            LOGGER.log(java.util.logging.Level.WARNING, "Exception processing feed item: " + url, e);
+            return false;
+        }
     }
 
-
-
     private void appendLog(String message) {
-        logTextView.append(message + "\n");
+        if (logTextView != null && message != null) {
+            logTextView.append(message + "\n");
+        }
     }
 
     @Override
@@ -177,3 +217,4 @@ public class ImportOpmlActivity extends AppCompatActivity {
         return true;
     }
 }
+

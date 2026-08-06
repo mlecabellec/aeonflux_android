@@ -25,11 +25,12 @@ public interface ArticleDao {
     @Query("SELECT * FROM articles WHERE source_id = :sourceId ORDER BY published_at DESC")
     List<ArticleEntity> getArticlesForSource(String sourceId);
 
-    @Query("SELECT * FROM articles WHERE source_id = :sourceId ORDER BY published_at DESC")
+    @Query("SELECT * FROM articles WHERE source_id = :sourceId ORDER BY published_at DESC LIMIT 100")
     LiveData<List<ArticleEntity>> getArticlesForSourceLiveData(String sourceId);
 
-    @Query("SELECT * FROM articles ORDER BY published_at DESC")
+    @Query("SELECT * FROM articles ORDER BY published_at DESC LIMIT 100")
     LiveData<List<ArticleEntity>> getAllArticlesLiveData();
+
 
 
     @Query("SELECT * FROM articles WHERE id = :articleId")

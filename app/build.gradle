@@ -1,7 +1,45 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.hilt.android)
+    id 'pmd'
+    id 'checkstyle'
 }
+
+pmd {
+    toolVersion = '7.0.0'
+    ignoreFailures = true
+    ruleSetConfig = resources.text.fromFile(rootProject.file('config/pmd/pmd.xml'))
+}
+
+task pmdCheck(type: Pmd) {
+    description 'Run PMD static code analysis on Java source files'
+    group 'verification'
+    source 'src/main/java'
+    include '**/*.java'
+    reports {
+        xml.required = true
+        html.required = true
+    }
+}
+
+checkstyle {
+    toolVersion = '10.12.5'
+    ignoreFailures = true
+    configFile = rootProject.file('config/checkstyle/checkstyle.xml')
+}
+
+task checkstyleCheck(type: Checkstyle) {
+    description 'Run Checkstyle static code analysis on Java source files'
+    group 'verification'
+    source 'src/main/java'
+    include '**/*.java'
+    classpath = files()
+    reports {
+        xml.required = true
+        html.required = true
+    }
+}
+
 
 android {
     namespace 'com.aeonflux.app'
