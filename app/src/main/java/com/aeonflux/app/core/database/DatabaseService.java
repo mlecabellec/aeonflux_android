@@ -4,7 +4,9 @@
  */
 package com.aeonflux.app.core.database;
 
+import androidx.lifecycle.LiveData;
 import com.aeonflux.app.core.database.entities.ArticleEntity;
+
 import com.aeonflux.app.core.database.entities.KeywordEntity;
 import com.aeonflux.app.core.database.entities.LabelEntity;
 import com.aeonflux.app.core.database.entities.PropertyEntity;
@@ -130,9 +132,24 @@ public class DatabaseService {
         return appDatabase.sourceDao().getSourceById(id);
     }
 
+    public SourceEntity getSourceByUrl(String url) {
+        Objects.requireNonNull(url, "url must not be null");
+        return appDatabase.sourceDao().getSourceByUrl(url);
+    }
+
+    public LiveData<List<SourceEntity>> getAllSourcesLiveData() {
+        return appDatabase.sourceDao().getAllSourcesLiveData();
+    }
+
+    public LiveData<List<ArticleEntity>> getAllArticlesLiveData() {
+        return appDatabase.articleDao().getAllArticlesLiveData();
+    }
+
     public List<SourceEntity> getAllSources() {
         return appDatabase.sourceDao().getAllSources();
     }
+
+
 
     // --- ARTICLES CRUD ---
 

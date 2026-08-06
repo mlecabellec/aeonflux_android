@@ -44,12 +44,24 @@ public class SourceEntity {
     @ColumnInfo(name = "is_contributed_to_gae")
     public int isContributedToGae = 0;
 
+    @ColumnInfo(name = "cron_expression")
+    public String cronExpression; // e.g. "0 */2 * * *" or minute intervals
+
+    @ColumnInfo(name = "last_fetch_status")
+    public String lastFetchStatus; // "SUCCESS", "ERROR: <msg>"
+
+    @ColumnInfo(name = "next_fetch_timestamp")
+    public Long nextFetchTimestamp;
+
     /* TSK-20260804-003.2 - Default Constructor required by Room */
     public SourceEntity() {
         this.id = "";
         this.url = "";
         this.title = "";
         this.sourceType = "RSS";
+        this.cronExpression = "0 */1 * * *";
+        this.lastFetchStatus = "PENDING";
+        this.nextFetchTimestamp = 0L;
     }
 
     @androidx.room.Ignore
@@ -62,6 +74,22 @@ public class SourceEntity {
                         int refreshIntervalMinutes,
                         Long lastRefreshedAt,
                         int isContributedToGae) {
+        this(id, url, title, description, iconUrl, sourceType, refreshIntervalMinutes, lastRefreshedAt, isContributedToGae, "0 */1 * * *", "PENDING", 0L);
+    }
+
+    @androidx.room.Ignore
+    public SourceEntity(@NonNull String id,
+                        @NonNull String url,
+                        @NonNull String title,
+                        String description,
+                        String iconUrl,
+                        @NonNull String sourceType,
+                        int refreshIntervalMinutes,
+                        Long lastRefreshedAt,
+                        int isContributedToGae,
+                        String cronExpression,
+                        String lastFetchStatus,
+                        Long nextFetchTimestamp) {
         this.id = Objects.requireNonNull(id, "id must not be null");
         this.url = Objects.requireNonNull(url, "url must not be null");
         this.title = Objects.requireNonNull(title, "title must not be null");
@@ -71,6 +99,9 @@ public class SourceEntity {
         this.refreshIntervalMinutes = refreshIntervalMinutes;
         this.lastRefreshedAt = lastRefreshedAt;
         this.isContributedToGae = isContributedToGae;
+        this.cronExpression = cronExpression != null ? cronExpression : "0 */1 * * *";
+        this.lastFetchStatus = lastFetchStatus != null ? lastFetchStatus : "PENDING";
+        this.nextFetchTimestamp = nextFetchTimestamp != null ? nextFetchTimestamp : 0L;
     }
 
     @Override
@@ -86,11 +117,15 @@ public class SourceEntity {
                Objects.equals(description, that.description) &&
                Objects.equals(iconUrl, that.iconUrl) &&
                Objects.equals(sourceType, that.sourceType) &&
-               Objects.equals(lastRefreshedAt, that.lastRefreshedAt);
+               Objects.equals(lastRefreshedAt, that.lastRefreshedAt) &&
+               Objects.equals(cronExpression, that.cronExpression) &&
+               Objects.equals(lastFetchStatus, that.lastFetchStatus) &&
+               Objects.equals(nextFetchTimestamp, that.nextFetchTimestamp);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, url, title, description, iconUrl, sourceType, refreshIntervalMinutes, lastRefreshedAt, isContributedToGae);
+        return Objects.hash(id, url, title, description, iconUrl, sourceType, refreshIntervalMinutes, lastRefreshedAt, isContributedToGae, cronExpression, lastFetchStatus, nextFetchTimestamp);
     }
 }
+

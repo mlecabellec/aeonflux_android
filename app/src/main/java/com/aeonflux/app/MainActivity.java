@@ -70,7 +70,35 @@ public class MainActivity extends AppCompatActivity {
         setupArticleList();
         setupSourceTree();
         setupGestures();
+        setupDrawerCommands();
     }
+
+    private void setupDrawerCommands() {
+        findViewById(R.id.btn_add_source).setOnClickListener(v -> {
+            startActivity(new Intent(MainActivity.this, com.aeonflux.app.ui.AddSourceActivity.class));
+            drawerLayout.closeDrawers();
+        });
+
+        android.view.View containerImportExport = findViewById(R.id.container_import_export_commands);
+        findViewById(R.id.btn_toggle_import_export).setOnClickListener(v -> {
+            boolean isVisible = containerImportExport.getVisibility() == android.view.View.VISIBLE;
+            containerImportExport.setVisibility(isVisible ? android.view.View.GONE : android.view.View.VISIBLE);
+        });
+
+        findViewById(R.id.btn_import_opml).setOnClickListener(v -> {
+            startActivity(new Intent(MainActivity.this, com.aeonflux.app.ui.ImportOpmlActivity.class));
+            drawerLayout.closeDrawers();
+        });
+
+        findViewById(R.id.btn_export_opml).setOnClickListener(v -> {
+            startActivity(new Intent(MainActivity.this, com.aeonflux.app.ui.ExportOpmlActivity.class));
+            drawerLayout.closeDrawers();
+        });
+    }
+
+
+    @javax.inject.Inject
+    com.aeonflux.app.core.database.DatabaseService databaseService;
 
     private void setupArticleList() {
         recyclerArticles.setLayoutManager(new LinearLayoutManager(this));
@@ -90,20 +118,35 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        loadSampleData();
+        databaseService.getAllArticlesLiveData().observe(this, articles -> {
+            if (articles != null && !articles.isEmpty()) {
+                articleAdapter.setArticles(articles);
+            } else {
+                loadSampleData();
+            }
+        });
     }
 
     private void setupSourceTree() {
         sourceTreeAdapter = new SourceTreeAdapter(this);
         expandableListView.setAdapter(sourceTreeAdapter);
 
-        List<SourceGroupDTO> groups = new ArrayList<>();
-        SourceGroupDTO defaultGroup = new SourceGroupDTO("grp_1", "All Sources", "#FF0000");
-        SourceEntity s1 = new SourceEntity("src_1", "https://news.ycombinator.com/rss", "Hacker News", "Tech news", null, "RSS", 60, System.currentTimeMillis(), 0);
-        defaultGroup.addSource(new SourceWithUnreadCount(s1, 3, System.currentTimeMillis()));
+        databaseService.getAllSourcesLiveData().observe(this, sources -> {
+            List<SourceGroupDTO> groups = new ArrayList<>();
+            SourceGroupDTO defaultGroup = new SourceGroupDTO("grp_1", "All Feeds & Sources", "#3B82F6");
 
-        groups.add(defaultGroup);
-        sourceTreeAdapter.setGroups(groups);
+            if (sources != null && !sources.isEmpty()) {
+                for (SourceEntity s : sources) {
+                    defaultGroup.addSource(new SourceWithUnreadCount(s, 0, s.lastRefreshedAt != null ? s.lastRefreshedAt : System.currentTimeMillis()));
+                }
+            } else {
+                SourceEntity s1 = new SourceEntity("src_1", "https://news.ycombinator.com/rss", "Hacker News", "Tech news", null, "RSS", 60, System.currentTimeMillis(), 0);
+                defaultGroup.addSource(new SourceWithUnreadCount(s1, 3, System.currentTimeMillis()));
+            }
+
+            groups.add(defaultGroup);
+            sourceTreeAdapter.setGroups(groups);
+        });
 
         expandableListView.setOnChildClickListener((parent, v, groupPosition, childPosition, id) -> {
             SourceWithUnreadCount child = (SourceWithUnreadCount) sourceTreeAdapter.getChild(groupPosition, childPosition);
@@ -113,11 +156,9 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+
     private void setupGestures() {
-        swipeRefreshLayout.setOnRefreshListener(() -> {
-            Toast.makeText(MainActivity.this, "Refreshing feeds...", Toast.LENGTH_SHORT).show();
-            swipeRefreshLayout.setRefreshing(false);
-        });
+        swipeRefreshLayout.setOnRefreshListener(this::triggerBackgroundFetch);
 
         ItemTouchHelper.SimpleCallback swipeCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
             @Override
@@ -138,6 +179,16 @@ public class MainActivity extends AppCompatActivity {
 
         new ItemTouchHelper(swipeCallback).attachToRecyclerView(recyclerArticles);
     }
+
+    private void triggerBackgroundFetch() {
+        Toast.makeText(MainActivity.this, "Triggering background RSS fetch...", Toast.LENGTH_SHORT).show();
+        androidx.work.OneTimeWorkRequest fetchWorkRequest =
+            new androidx.work.OneTimeWorkRequest.Builder(com.aeonflux.app.core.fetch.RssFetchWorker.class).build();
+        androidx.work.WorkManager.getInstance(getApplicationContext()).enqueue(fetchWorkRequest);
+        swipeRefreshLayout.setRefreshing(false);
+    }
+
+
 
     private void loadSampleData() {
         ArticleEntity a1 = new ArticleEntity("art_1", "src_1", "guid_1", "AeonFlux Android Architecture Overview", "<p>Content</p>", "Clean architecture overview for offline-first feed ingestion.", "Aeon Team", System.currentTimeMillis(), "https://aeonflux.dev/arch");
@@ -162,9 +213,10 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.action_refresh) {
-            Toast.makeText(this, "Force refreshing feeds...", Toast.LENGTH_SHORT).show();
+            triggerBackgroundFetch();
             return true;
         } else if (id == R.id.action_settings) {
+
             startActivity(new Intent(this, SettingsActivity.class));
             return true;
         } else if (id == R.id.action_toggle_label_grouping) {

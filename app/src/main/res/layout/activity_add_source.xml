@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Feed / Source Details"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:paddingBottom="16dp" />
+
+    <EditText
+        android:id="@+id/edit_source_url"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Feed RSS URL (e.g. https://example.com/rss.xml)"
+        android:inputType="textUri" />
+
+    <EditText
+        android:id="@+id/edit_source_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Feed Title (Optional)"
+        android:inputType="textCapWords" />
+
+    <EditText
+        android:id="@+id/edit_source_category"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Category / Label (Optional)"
+        android:inputType="text" />
+
+    <Button
+        android:id="@+id/btn_save_source"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="Add Feed" />
+
+</LinearLayout>

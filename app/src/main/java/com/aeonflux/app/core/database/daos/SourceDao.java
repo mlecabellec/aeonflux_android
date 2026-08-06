@@ -67,6 +67,13 @@ public interface SourceDao {
     @Query("SELECT s.*, (SELECT COUNT(*) FROM articles a WHERE a.source_id = s.id AND a.is_read = 0) as unreadCount, (SELECT COALESCE(MAX(a.published_at), 0) FROM articles a WHERE a.source_id = s.id) as lastArticleAt FROM sources s ORDER BY lastArticleAt DESC")
     List<com.aeonflux.app.core.database.models.SourceWithUnreadCount> getSourcesWithUnreadCountLastArticleDesc();
 
+    @Query("SELECT * FROM sources WHERE url = :url LIMIT 1")
+    SourceEntity getSourceByUrl(String url);
+
+    @Query("SELECT * FROM sources WHERE next_fetch_timestamp <= :currentTimestamp")
+    List<SourceEntity> getSourcesDueForFetch(long currentTimestamp);
+
     @Query("DELETE FROM sources")
     void deleteAllSources();
 }
+

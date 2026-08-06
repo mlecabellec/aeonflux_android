@@ -1,0 +1,86 @@
+<?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
+<opml version="1.0">
+  <head>
+    <title>Pocket Casts Feeds</title>
+  </head>
+  <body>
+    <outline text="feeds">
+      <outline type="rss" text="Les Pieds sur terre" xmlUrl="https://radiofrance-podcast.net/podcast09/35099478-7c72-4f9e-a6de-1b928400e9e5/rss_10078.xml" />
+      <outline type="rss" text="INFRA" xmlUrl="https://feeds.audiomeans.fr/feed/6c347492-0f45-4f31-9ce7-aea647ec3736.xml" />
+      <outline type="rss" text="Milieux Bibliques - Thomas Römer" xmlUrl="https://podcast.college-de-france.fr/xml2/cdf9-25.xml" />
+      <outline type="rss" text="Nouveau monde" xmlUrl="https://radiofrance-podcast.net/podcast09/35099478-7c72-4f9e-a6de-1b928400e9e5/rss_18998.xml" />
+      <outline type="rss" text="Psychologie cognitive expérimentale - Stanislas Dehaene" xmlUrl="https://podcast.college-de-france.fr/xml2/cdf3-5.xml" />
+      <outline type="rss" text="Les Couilles sur la table" xmlUrl="https://feeds.audiomeans.fr/feed/d9cd7538-7491-4873-b0c4-90ccba60ccf6.xml" />
+      <outline type="rss" text="Le meilleur de la science" xmlUrl="https://radiofrance-podcast.net/podcast09/35099478-7c72-4f9e-a6de-1b928400e9e5/rss_18929.xml" />
+      <outline type="rss" text="Le Cours de l'histoire" xmlUrl="https://radiofrance-podcast.net/podcast09/35099478-7c72-4f9e-a6de-1b928400e9e5/rss_10076.xml" />
+      <outline type="rss" text="Choses à Savoir SCIENCES" xmlUrl="https://feeds.acast.com/public/shows/660679208268a800165a28ef" />
+      <outline type="rss" text="Civilisation mésopotamienne - Dominique Charpin" xmlUrl="https://podcast.college-de-france.fr/xml2/cdf8-77.xml" />
+      <outline type="rss" text="Thinkerview" xmlUrl="https://www.thinkerview.com/feed/podcast/" />
+      <outline type="rss" text="Civilisation de l'Égypte pharaonique - Laurent Coulon" xmlUrl="https://podcast.college-de-france.fr/xml2/coulon-civilisation.xml" />
+      <outline type="rss" text="Économie des institutions, de l'innovation et de la croissance - Philippe Aghion" xmlUrl="https://podcast.college-de-france.fr/xml2/cdf15-94.xml" />
+      <outline type="rss" text="Laurent Gerra" xmlUrl="https://feeds.audiomeans.fr/feed/b799ffaa-ccee-4a9a-a75f-0137a5787288.xml" />
+      <outline type="rss" text="Artisan Développeur" xmlUrl="https://feed.ausha.co/BxW2S9Mex0Vb" />
+      <outline type="rss" text="Les Enjeux internationaux" xmlUrl="https://radiofrance-podcast.net/podcast09/35099478-7c72-4f9e-a6de-1b928400e9e5/rss_13305.xml" />
+      <outline type="rss" text="Culture écrite de l'antiquité tardive et papyrologie byzantine - Jean-Luc Fournet" xmlUrl="https://podcast.college-de-france.fr/xml2/cdf8-104.xml" />
+      <outline type="rss" text="Évolution du développement et des génomes - Denis Duboule" xmlUrl="https://podcast.college-de-france.fr/spotify/cdf3-153.xml" />
+      <outline type="rss" text="Histoire du Coran. Texte et transmission - François Déroche" xmlUrl="https://podcast.college-de-france.fr/xml2/cdf9-92.xml" />
+      <outline type="rss" text="Paléoanthropologie du genre Homo - Jean-Jacques Hublin" xmlUrl="https://podcast.college-de-france.fr/xml2/cdf4-78.xml" />
+      <outline type="rss" text="Collège de France - Sélection" xmlUrl="https://podcast.college-de-france.fr/xml/general.xml" />
+      <outline type="rss" text="Le Billet de François Morel" xmlUrl="https://radiofrance-podcast.net/podcast09/35099478-7c72-4f9e-a6de-1b928400e9e5/rss_11531.xml" />
+      <outline type="rss" text="Formation planétaire : de la Terre aux exoplanète - Alessandro Morbidelli" xmlUrl="https://podcast.college-de-france.fr/xml2/morbidelli.xml" />
+      <outline type="rss" text="Darknet Diaries" xmlUrl="https://podcast.darknetdiaries.com" />
+      <outline type="rss" text="Atomes et Rayonnement - Jean Dalibard" xmlUrl="https://podcast.college-de-france.fr/xml2/cdf1-61.xml" />
+      <outline type="rss" text="Informatique et sciences numériques (2017-2018) - Claire Mathieu" xmlUrl="https://podcast.college-de-france.fr/xml2/cdf11-121.xml" />
+      <outline type="rss" text="Informatique et sciences numériques (2018-2019) - Rachid Guerraoui" xmlUrl="https://podcast.college-de-france.fr/xml2/cdf11-126.xml" />
+      <outline type="rss" text="Entendez-vous l'éco ?" xmlUrl="https://radiofrance-podcast.net/podcast09/35099478-7c72-4f9e-a6de-1b928400e9e5/rss_10081.xml" />
+      <outline type="rss" text="Underscore_" xmlUrl="https://feeds.acast.com/public/shows/43160adc-fadd-4764-b93f-aa1ca93f22bf" />
+      <outline type="rss" text="Le rendez-vous Tech" xmlUrl="https://feeds.acast.com/public/shows/le-rdv-tech" />
+      <outline type="rss" text="Génomique humaine et évolution - Lluis Quintana-Murci" xmlUrl="https://podcast.college-de-france.fr/xml2/cdf3-135.xml" />
+      <outline type="rss" text="Droit international des institutions - Samantha Besson" xmlUrl="https://podcast.college-de-france.fr/xml2/cdf6-143.xml" />
+      <outline type="rss" text="Le journal de 8H00" xmlUrl="https://radiofrance-podcast.net/podcast09/35099478-7c72-4f9e-a6de-1b928400e9e5/rss_10057.xml" />
+      <outline type="rss" text="Informatique et sciences numériques (2024-2025) - Thierry Coquand" xmlUrl="https://podcast.college-de-france.fr/xml2/thierry-coquand.xml" />
+      <outline type="rss" text="Épigénétique et mémoire cellulaire - Edith Heard" xmlUrl="https://podcast.college-de-france.fr/xml2/cdf2-58.xml" />
+      <outline type="rss" text="2 Heures De Perdues" xmlUrl="http://www.2hdp.fr/2HDP.xml" />
+      <outline type="rss" text="Santé publique (2024-2025) - Nathalie Bajos" xmlUrl="https://podcast.college-de-france.fr/xml2/sante-publique-bajos.xml" />
+      <outline type="rss" text="Champs, cordes et gravité - Marc Henneaux" xmlUrl="https://podcast.college-de-france.fr/xml2/cdf1-142.xml" />
+      <outline type="rss" text="La Conversation scientifique" xmlUrl="https://radiofrance-podcast.net/podcast09/35099478-7c72-4f9e-a6de-1b928400e9e5/rss_13957.xml" />
+      <outline type="rss" text="Avec philosophie" xmlUrl="https://radiofrance-podcast.net/podcast09/35099478-7c72-4f9e-a6de-1b928400e9e5/rss_10467.xml" />
+      <outline type="rss" text="La Revue de presse internationale" xmlUrl="https://radiofrance-podcast.net/podcast09/35099478-7c72-4f9e-a6de-1b928400e9e5/rss_10901.xml" />
+      <outline type="rss" text="Maths en tête" xmlUrl="https://feeds.podcastics.com/podcastics/podcasts/rss/8668_0aad6f6c8d330ad3d93780b5b84873c4.rss" />
+      <outline type="rss" text="La Terre au carré" xmlUrl="https://radiofrance-podcast.net/podcast09/35099478-7c72-4f9e-a6de-1b928400e9e5/rss_10212.xml" />
+      <outline type="rss" text="Nota Bene" xmlUrl="https://feeds.acast.com/public/shows/60d08901011c680012d146fc" />
+      <outline type="rss" text="Ciel &amp; Espace" xmlUrl="https://ephemerides.cieletespace.fr/" />
+      <outline type="rss" text="Droit, culture et société de la Rome antique - Dario Mantovani" xmlUrl="https://podcast.college-de-france.fr/xml2/cdf8-132.xml" />
+      <outline type="rss" text="La Science, CQFD" xmlUrl="https://radiofrance-podcast.net/podcast09/35099478-7c72-4f9e-a6de-1b928400e9e5/rss_14312.xml" />
+      <outline type="rss" text="Sciences des données - Stéphane Mallat" xmlUrl="https://podcast.college-de-france.fr/xml2/cdf11-120.xml" />
+      <outline type="rss" text="Informatique et sciences numériques (2015-2016) - Yann LeCun" xmlUrl="https://podcast.college-de-france.fr/xml2/cdf11-106.xml" />
+      <outline type="rss" text="Sciences du logiciel - Xavier Leroy" xmlUrl="https://podcast.college-de-france.fr/xml2/cdf11-127.xml" />
+      <outline type="rss" text="Le billet sciences" xmlUrl="https://radiofrance-podcast.net/podcast09/35099478-7c72-4f9e-a6de-1b928400e9e5/rss_20339.xml" />
+      <outline type="rss" text="LSD, La série documentaire" xmlUrl="https://radiofrance-podcast.net/podcast09/35099478-7c72-4f9e-a6de-1b928400e9e5/rss_10177.xml" />
+      <outline type="rss" text="Informatique et sciences numériques (2023-2024) - Benoît Sagot" xmlUrl="https://podcast.college-de-france.fr/xml2/benoit-sagot.xml" />
+      <outline type="rss" text="Oncologie cellulaire et moléculaire - Hugues de Thé" xmlUrl="https://podcast.college-de-france.fr/xml2/cdf3-84.xml" />
+      <outline type="rss" text="Informatique et sciences numériques (2020-2021) - Frédéric Magniez" xmlUrl="https://podcast.college-de-france.fr/xml2/cdf11-148.xml" />
+      <outline type="rss" text="Histoire des systèmes de pensée - Michel Foucault" xmlUrl="https://podcast.college-de-france.fr/xml2/michel-foucault.xml" />
+      <outline type="rss" text="Cogitons sciences" xmlUrl="https://feed.ausha.co/BGkaNCgq8kYp" />
+      <outline type="rss" text="Affaires sensibles" xmlUrl="https://radiofrance-podcast.net/podcast09/35099478-7c72-4f9e-a6de-1b928400e9e5/rss_13940.xml" />
+      <outline type="rss" text="Géopolitique" xmlUrl="https://radiofrance-podcast.net/podcast09/35099478-7c72-4f9e-a6de-1b928400e9e5/rss_10009.xml" />
+      <outline type="rss" text="Futura dans les étoiles : le rendez-vous de l'astronomie" xmlUrl="https://feeds.audiomeans.fr/feed/f4b5fd87-077f-4409-8c10-6f16ef49e475.xml" />
+      <outline type="rss" text="Galaxies et cosmologie - Françoise Combes" xmlUrl="https://podcast.college-de-france.fr/xml2/cdf11-86.xml" />
+      <outline type="rss" text="L'angle éco de François Lenglet" xmlUrl="https://feeds.audiomeans.fr/feed/2c0f0853-d472-44bf-a920-baaa0bcd4c35.xml" />
+      <outline type="rss" text="Sociologie du travail créateur - Pierre-Michel Menger" xmlUrl="https://podcast.college-de-france.fr/xml2/cdf5-69.xml" />
+      <outline type="rss" text="Affaires étrangères" xmlUrl="https://radiofrance-podcast.net/podcast09/35099478-7c72-4f9e-a6de-1b928400e9e5/rss_12841.xml" />
+      <outline type="rss" text="Dynamiques du vivant - Thomas Lecuit" xmlUrl="https://podcast.college-de-france.fr/xml2/cdf2-144.xml" />
+      <outline type="rss" text="Algorithmes, machines et langages - Gérard Berry" xmlUrl="https://podcast.college-de-france.fr/xml2/cdf11-60.xml" />
+      <outline type="rss" text="Innovation technologique Liliane Bettencourt (2024-2025) - Sébastien Lecommandoux" xmlUrl="https://podcast.college-de-france.fr/xml2/bettencourt-lecommandoux.xml" />
+      <outline type="rss" text="Choses à Savoir - Culture générale" xmlUrl="https://feeds.acast.com/public/shows/66057de88268a800162cadf2" />
+      <outline type="rss" text="Journal de 6h" xmlUrl="https://radiofrance-podcast.net/podcast09/35099478-7c72-4f9e-a6de-1b928400e9e5/rss_12559.xml" />
+      <outline type="rss" text="Colloques du Collège de France - Collège de France" xmlUrl="https://podcast.college-de-france.fr/xml2/cdf12-34.xml" />
+      <outline type="rss" text="Histoire des pouvoirs en Europe occidentale, XIIIe-XVIe siècle - Patrick Boucheron" xmlUrl="https://podcast.college-de-france.fr/xml2/cdf8-100.xml" />
+      <outline type="rss" text="Questions morales et enjeux politiques dans les sociétés contemporaines - Didier Fassin" xmlUrl="https://podcast.college-de-france.fr/xml2/cdf3-146.xml" />
+      <outline type="rss" text="Les podcasts de l'ISP" xmlUrl="https://feeds.soundcloud.com/users/soundcloud:users:431587371/sounds.rss" />
+      <outline type="rss" text="Les Nouilles Rampantes" xmlUrl="https://feeds.acast.com/public/shows/5f96d0996c147056d0e3a880" />
+      <outline type="rss" text="Théorie économique et organisation sociale - Roger Guesnerie" xmlUrl="https://podcast.college-de-france.fr/xml2/cdf15-54.xml" />
+      <outline type="rss" text="Géométrie spectrale - Nalini Anantharaman" xmlUrl="https://podcast.college-de-france.fr/xml2/nanantharaman.xml" />
+    </outline>
+  </body>
+</opml>

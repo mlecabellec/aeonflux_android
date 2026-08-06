@@ -37,6 +37,22 @@
             android:exported="false"
             android:theme="@style/Theme.AeonFlux" />
 
+        <activity
+            android:name=".ui.AddSourceActivity"
+            android:exported="false"
+            android:theme="@style/Theme.AeonFlux" />
+
+        <activity
+            android:name=".ui.ImportOpmlActivity"
+            android:exported="false"
+            android:theme="@style/Theme.AeonFlux" />
+
+        <activity
+            android:name=".ui.ExportOpmlActivity"
+            android:exported="false"
+            android:theme="@style/Theme.AeonFlux" />
+
+
         <service
             android:name=".core.media.PlaybackService"
             android:enabled="true"
