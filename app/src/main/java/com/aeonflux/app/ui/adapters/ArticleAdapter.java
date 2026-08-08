@@ -89,8 +89,11 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ArticleV
             starredImg.setVisibility(article.isBookmarked == 1 ? View.VISIBLE : View.GONE);
 
             itemView.setOnClickListener(v -> {
+                android.util.Log.d("AeonFlux_ArticleAdapter", "[DEBUG-LOG] Article clicked: id=" + article.id + ", title=" + article.title + ", url=" + article.url);
                 if (listener != null) {
                     listener.onArticleClick(article);
+                } else {
+                    android.util.Log.w("AeonFlux_ArticleAdapter", "[DEBUG-LOG] OnArticleClickListener is NULL!");
                 }
             });
         }

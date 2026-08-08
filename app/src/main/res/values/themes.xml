@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  [CS-0010] [CS-0020] Application Base Theme.
+  Reference: TSK-20260805-001 / FR-20260809-001
+-->
 <resources>
     <style name="Theme.AeonFlux" parent="Theme.AppCompat.DayNight.NoActionBar">
         <item name="colorPrimary">@color/slate_900</item>
@@ -6,6 +10,4 @@
         <item name="colorAccent">#FF3B82F6</item>
         <item name="android:statusBarColor">@color/black</item>
     </style>
-
 </resources>
-

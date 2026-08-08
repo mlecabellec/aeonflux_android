@@ -110,19 +110,51 @@ public class MainActivity extends AppCompatActivity {
         recyclerArticles.setAdapter(articleAdapter);
 
         articleAdapter.setOnArticleClickListener(article -> {
+            android.util.Log.d("AeonFlux_MainActivity", "[DEBUG-LOG] onArticleClick triggered for article ID=" + article.id + ", title='" + article.title + "', url='" + article.url + "'");
             quickSummaryText.setText("Selected: " + article.title + "\n\n" + (article.aiSummary != null ? article.aiSummary : article.title));
 
-            Intent intent = new Intent(MainActivity.this, ItemViewActivity.class);
-            intent.putExtra(ItemViewActivity.EXTRA_ARTICLE_ID, article.id);
-            intent.putExtra(ItemViewActivity.EXTRA_TITLE, article.title);
-            intent.putExtra(ItemViewActivity.EXTRA_SUMMARY, article.contentCleaned);
-            intent.putExtra(ItemViewActivity.EXTRA_URL, article.url);
-            intent.putExtra(ItemViewActivity.EXTRA_AUTHOR, article.author);
-            intent.putExtra(ItemViewActivity.EXTRA_PUBLISHED_AT, article.publishedAt);
-            startActivity(intent);
+            try {
+                Intent intent = new Intent(MainActivity.this, ItemViewActivity.class);
+                intent.putExtra(ItemViewActivity.EXTRA_ARTICLE_ID, article.id);
+                intent.putExtra(ItemViewActivity.EXTRA_TITLE, article.title);
+                intent.putExtra(ItemViewActivity.EXTRA_SUMMARY, article.contentCleaned);
+                intent.putExtra(ItemViewActivity.EXTRA_URL, article.url);
+                intent.putExtra(ItemViewActivity.EXTRA_AUTHOR, article.author);
+                intent.putExtra(ItemViewActivity.EXTRA_PUBLISHED_AT, article.publishedAt);
+                intent.putExtra(ItemViewActivity.EXTRA_IS_READ, article.isRead == 1);
+                android.util.Log.d("AeonFlux_MainActivity", "[DEBUG-LOG] Starting ItemViewActivity intent with extras.");
+                startActivity(intent);
+            } catch (Exception e) {
+                android.util.Log.e("AeonFlux_MainActivity", "[DEBUG-LOG] Exception launching ItemViewActivity!", e);
+            }
         });
 
         observeArticles();
+    }
+
+    private boolean isAscendingSort = false;
+    private boolean showOnlyUnread = false;
+
+    private void applySortAndFilterAndSetArticles(List<ArticleEntity> articles) {
+        if (articles == null || articles.isEmpty()) {
+            articleAdapter.setArticles(new ArrayList<>());
+            return;
+        }
+        List<ArticleEntity> filtered = new ArrayList<>();
+        for (ArticleEntity a : articles) {
+            if (showOnlyUnread && a.isRead == 1) {
+                continue;
+            }
+            filtered.add(a);
+        }
+        filtered.sort((a1, a2) -> {
+            if (isAscendingSort) {
+                return Long.compare(a1.publishedAt, a2.publishedAt);
+            } else {
+                return Long.compare(a2.publishedAt, a1.publishedAt);
+            }
+        });
+        articleAdapter.setArticles(filtered);
     }
 
     private androidx.lifecycle.Observer<List<ArticleEntity>> currentArticleObserver = null;
@@ -133,13 +165,7 @@ public class MainActivity extends AppCompatActivity {
             currentArticlesLiveData.removeObserver(currentArticleObserver);
         }
 
-        currentArticleObserver = articles -> {
-            if (articles != null && !articles.isEmpty()) {
-                articleAdapter.setArticles(articles);
-            } else {
-                articleAdapter.setArticles(new ArrayList<>());
-            }
-        };
+        currentArticleObserver = articles -> applySortAndFilterAndSetArticles(articles);
 
         if (selectedSourceId == null) {
             currentArticlesLiveData = databaseService.getAllArticlesLiveData();
@@ -149,9 +175,6 @@ public class MainActivity extends AppCompatActivity {
 
         currentArticlesLiveData.observe(this, currentArticleObserver);
     }
-
-
-
 
     private void setupSourceTree() {
         sourceTreeAdapter = new SourceTreeAdapter(this);
@@ -189,9 +212,6 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-
-
-
     private void setupGestures() {
         swipeRefreshLayout.setOnRefreshListener(this::triggerBackgroundFetch);
 
@@ -223,8 +243,6 @@ public class MainActivity extends AppCompatActivity {
         swipeRefreshLayout.setRefreshing(false);
     }
 
-
-
     private void loadSampleData() {
         ArticleEntity a1 = new ArticleEntity("art_1", "src_1", "guid_1", "AeonFlux Android Architecture Overview", "<p>Content</p>", "Clean architecture overview for offline-first feed ingestion.", "Aeon Team", System.currentTimeMillis(), "https://aeonflux.dev/arch");
         a1.aiSummary = "Summary of architecture overview.";
@@ -251,12 +269,33 @@ public class MainActivity extends AppCompatActivity {
             triggerBackgroundFetch();
             return true;
         } else if (id == R.id.action_settings) {
-
             startActivity(new Intent(this, SettingsActivity.class));
             return true;
         } else if (id == R.id.action_toggle_label_grouping) {
             item.setChecked(!item.isChecked());
             Toast.makeText(this, item.isChecked() ? "Grouping by Labels enabled" : "Grouping by Labels disabled", Toast.LENGTH_SHORT).show();
+            return true;
+        } else if (id == R.id.action_sort_item_timestamp_asc) {
+            isAscendingSort = true;
+            Toast.makeText(this, "Sorted items by Timestamp (ASC)", Toast.LENGTH_SHORT).show();
+            if (currentArticlesLiveData != null && currentArticlesLiveData.getValue() != null) {
+                applySortAndFilterAndSetArticles(currentArticlesLiveData.getValue());
+            }
+            return true;
+        } else if (id == R.id.action_sort_item_timestamp_desc) {
+            isAscendingSort = false;
+            Toast.makeText(this, "Sorted items by Timestamp (DESC)", Toast.LENGTH_SHORT).show();
+            if (currentArticlesLiveData != null && currentArticlesLiveData.getValue() != null) {
+                applySortAndFilterAndSetArticles(currentArticlesLiveData.getValue());
+            }
+            return true;
+        } else if (id == R.id.action_toggle_read_items) {
+            item.setChecked(!item.isChecked());
+            showOnlyUnread = !item.isChecked();
+            Toast.makeText(this, item.isChecked() ? "Showing all items" : "Showing only unread items", Toast.LENGTH_SHORT).show();
+            if (currentArticlesLiveData != null && currentArticlesLiveData.getValue() != null) {
+                applySortAndFilterAndSetArticles(currentArticlesLiveData.getValue());
+            }
             return true;
         }
         return super.onOptionsItemSelected(item);

@@ -64,7 +64,13 @@ public class RssFeedParser {
                             if ("title".equalsIgnoreCase(tagName)) {
                                 currentTitle = safeNextText(parser);
                             } else if ("link".equalsIgnoreCase(tagName)) {
-                                currentLink = safeNextText(parser);
+                                String hrefAttr = parser.getAttributeValue(null, "href");
+                                String textContent = safeNextText(parser);
+                                if (hrefAttr != null && !hrefAttr.trim().isEmpty()) {
+                                    currentLink = hrefAttr.trim();
+                                } else if (textContent != null && !textContent.trim().isEmpty()) {
+                                    currentLink = textContent.trim();
+                                }
                             } else if ("guid".equalsIgnoreCase(tagName) || "id".equalsIgnoreCase(tagName)) {
                                 currentGuid = safeNextText(parser);
                             } else if ("description".equalsIgnoreCase(tagName) || "summary".equalsIgnoreCase(tagName) || "content".equalsIgnoreCase(tagName)) {
@@ -79,19 +85,21 @@ public class RssFeedParser {
                 } else if (eventType == XmlPullParser.END_TAG) {
                     if ("item".equalsIgnoreCase(tagName) || "entry".equalsIgnoreCase(tagName)) {
                         inItem = false;
-                        if (!currentTitle.isEmpty() || !currentLink.isEmpty()) {
+                        if (!currentTitle.isEmpty() || !currentLink.isEmpty() || !currentGuid.isEmpty()) {
                             String articleId = "art_" + UUID.randomUUID().toString().substring(0, 8);
-                            String guid = !currentGuid.isEmpty() ? currentGuid : (!currentLink.isEmpty() ? currentLink : articleId);
+                            String resolvedUrl = !currentLink.isEmpty() ? currentLink :
+                                (!currentGuid.isEmpty() && (currentGuid.startsWith("http://") || currentGuid.startsWith("https://")) ? currentGuid : "");
+                            String guid = !currentGuid.isEmpty() ? currentGuid : (!resolvedUrl.isEmpty() ? resolvedUrl : articleId);
                             ArticleEntity article = new ArticleEntity(
                                 articleId,
                                 sourceId,
                                 guid,
-                                currentTitle.isEmpty() ? currentLink : currentTitle,
+                                !currentTitle.isEmpty() ? currentTitle : (resolvedUrl.isEmpty() ? "Untitled Item" : resolvedUrl),
                                 currentDescription,
                                 currentDescription.replaceAll("<[^>]*>", "").trim(),
                                 currentAuthor.isEmpty() ? "RSS Feed" : currentAuthor,
                                 publishedAt,
-                                currentLink
+                                resolvedUrl
                             );
                             articles.add(article);
                         }

@@ -54,6 +54,16 @@
             android:exported="false"
             android:theme="@style/Theme.AeonFlux" />
 
+        <activity
+            android:name=".ui.WebViewActivity"
+            android:exported="false"
+            android:theme="@style/Theme.AeonFlux" />
+
+        <activity
+            android:name=".ui.PrivateWebViewActivity"
+            android:exported="false"
+            android:theme="@style/Theme.AeonFlux" />
+
 
         <service
             android:name=".core.media.PlaybackService"

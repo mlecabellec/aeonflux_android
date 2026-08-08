@@ -176,6 +176,19 @@ public class DatabaseService {
         notifyUpdated(article);
     }
 
+    public void updateReadStatusAsync(String articleId, boolean isRead) {
+        if (articleId == null || articleId.trim().isEmpty()) {
+            return;
+        }
+        java.util.concurrent.Executors.newSingleThreadExecutor().execute(() -> {
+            try {
+                appDatabase.articleDao().updateReadStatus(articleId, isRead ? 1 : 0);
+            } catch (Exception e) {
+                // Non-fatal database update exception handling
+            }
+        });
+    }
+
     public void deleteArticle(ArticleEntity article) {
         Objects.requireNonNull(article, "article must not be null");
         appDatabase.articleDao().deleteArticle(article);
