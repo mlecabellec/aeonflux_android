@@ -44,6 +44,7 @@ task checkstyleCheck(type: Checkstyle) {
 android {
     namespace 'com.aeonflux.app'
     compileSdk 34
+    ndkVersion "26.1.10909125"
 
     defaultConfig {
         applicationId 'com.aeonflux.app'
