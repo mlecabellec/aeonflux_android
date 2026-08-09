@@ -20,6 +20,7 @@ local.properties
 /doc/site/
 /doc/documentation.pdf
 
-# Model binary weights
-/app/src/main/assets/*.bin
+# Python cache
+__pycache__/
+*.pyc
 

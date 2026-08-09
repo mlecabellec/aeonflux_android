@@ -39,6 +39,12 @@ Focuses on repository build commands, project roadmap milestones, and task logs.
 - [Vosk STT Engine & About Application Activity Feature](specifications/FR-20260809-003.md): VoskTranscriptEngine, AboutActivity with about.html asset, and STT toggle controls.
 - [Audio VAD Silence Detector & Background Management Feature](specifications/FR-20260809-004.md): AudioSilenceDetector VAD sentence segmenter, centered auto-scroll, 50-item buffer cap, and background auto-pause/resume lifecycle.
 
+---
+
+## ⚡ Topic E: Development Environment & Android-Kit Provisioner
+Focuses on development toolchain provisioning, environment activation scripts, launchers, and virtual device management.
+- [Android-Kit Provisioner & Environment Guide](environment/android_kit.md): Automated TRON TUI manager (`helpers/android_kit_setup.py`), activation scripts, turn-key launchers, and Pixel 5/8 AVD setup.
+
 
 
 
