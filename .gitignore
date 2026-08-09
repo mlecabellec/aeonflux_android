@@ -24,3 +24,7 @@ local.properties
 __pycache__/
 *.pyc
 
+# Model binary weights
+/app/src/main/assets/*.bin
+.agents/
+
