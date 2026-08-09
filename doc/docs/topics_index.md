@@ -43,7 +43,7 @@ Focuses on repository build commands, project roadmap milestones, and task logs.
 
 ## ⚡ Topic E: Development Environment & Android-Kit Provisioner
 Focuses on development toolchain provisioning, environment activation scripts, launchers, and virtual device management.
-- [Android-Kit Provisioner & Environment Guide](environment/android_kit.md): Automated TRON TUI manager (`helpers/android_kit_setup.py`), activation scripts, turn-key launchers, and Pixel 5/8 AVD setup.
+- [Android-Kit Provisioner & Environment Guide](environment/android_kit.md): Automated Cybernetic TUI manager (`helpers/android_kit_setup.py`), activation scripts, turn-key launchers, and Pixel 5/8 AVD setup.
 
 
 

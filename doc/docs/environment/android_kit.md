@@ -9,9 +9,9 @@ This documentation details the automated **Android-Kit Cybernetic Provisioner & 
 To maintain reproducible, isolated, and turn-key development environments across different Linux distributions (Debian, Ubuntu, Fedora, Arch, openSUSE), all build toolchains and IDEs are provisioned directly into `$HOME/android-kit`.
 
 ### Key Features:
-* **TRON TUI Design**: Built with a glowing cybernetic cyan/blue terminal user interface featuring ASCII art headers, dynamic status matrices, progress indicators, and interactive menus.
+* **Cybernetic TUI Design**: Built with a glowing cybernetic cyan/blue terminal user interface featuring crisp AEONFLUX ASCII art headers, dynamic status matrices, progress indicators, and interactive menus.
 * **Turn-Key Isolation**: Installs JDK 17, Gradle 9.3.0, Android SDK API 34, Android NDK r26b, CMake 3.22.1, and Android Studio into `$HOME/android-kit` without polluting root system packages.
-* **Launchers directly in `$HOME/android-kit`**: Executable wrappers for `android-studio`, `gradle`, `adb`, `emulator`, `sdkmanager`, and AVD quick-launchers.
+* **Launchers directly in `$HOME/android-kit`**: Executable wrappers for `android-studio`, `gradle.sh`, `adb.sh`, `emulator.sh`, `sdkmanager.sh`, and AVD quick-launchers.
 * **On-Demand Virtual Devices**: Prepares **Pixel 5** (`Pixel_5_API_34`) and **Pixel 8** (`Pixel_8_API_34`) AVDs pre-configured with 4GB RAM, KVM acceleration, and 512MB heap limits.
 * **Environment Activator**: Provides `source $HOME/android-kit/env_activate.sh` to export `JAVA_HOME`, `ANDROID_HOME`, `ANDROID_NDK_ROOT`, `GRADLE_HOME`, and update `$PATH`.
 
@@ -33,8 +33,8 @@ To maintain reproducible, isolated, and turn-key development environments across
 
 ## 🚀 Quick Start & Usage
 
-### 1. Interactive TRON TUI Setup Manager
-To run the interactive TRON manager interface:
+### 1. Interactive Cybernetic TUI Setup Manager
+To run the interactive Cybernetic manager interface:
 
 ```bash
 # Run via Bash wrapper (auto-detects Python 3)
@@ -70,7 +70,7 @@ source helpers/activate_env.sh
 source $HOME/android-kit/env_activate.sh
 ```
 
-Upon activation, the shell will display the **TRON Environment HUD**:
+Upon activation, the shell will display the **Cybernetic Environment HUD**:
 
 ```text
 ▲ [AEONFLUX ANDROID-KIT ACTIVE]
@@ -90,10 +90,10 @@ Direct launchers are created in `$HOME/android-kit/` for immediate invocation:
 | Launcher Script | Description |
 | :--- | :--- |
 | `$HOME/android-kit/android-studio` | Launches Android Studio IDE with correct JDK and SDK variables |
-| `$HOME/android-kit/gradle` | Runs Gradle binary wrapper with Java 17 |
-| `$HOME/android-kit/adb` | Executes Android Debug Bridge (`adb`) |
-| `$HOME/android-kit/emulator` | Executes Android Emulator binary |
-| `$HOME/android-kit/sdkmanager` | Manages Android SDK packages |
+| `$HOME/android-kit/gradle.sh` | Runs Gradle binary wrapper with Java 17 |
+| `$HOME/android-kit/adb.sh` | Executes Android Debug Bridge (`adb`) |
+| `$HOME/android-kit/emulator.sh` | Executes Android Emulator binary |
+| `$HOME/android-kit/sdkmanager.sh` | Manages Android SDK packages |
 | `$HOME/android-kit/start-pixel5.sh` | Quick-launches Pixel 5 AVD with KVM acceleration |
 | `$HOME/android-kit/start-pixel8.sh` | Quick-launches Pixel 8 AVD with KVM acceleration |
 

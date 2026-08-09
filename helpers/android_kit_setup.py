@@ -4,7 +4,7 @@
   ▲ E O N F L U X // A N D R O I D - K I T  S E T U P  M A N A G E R
 ===============================================================================
   File:         helpers/android_kit_setup.py
-  Description:  Cybernetic TRON-themed setup manager for Android development environment.
+  Description:  Cybernetic setup manager for Android development environment.
                 Detects, downloads, extracts, provisions, and configures:
                   - JDK 17 (Eclipse Temurin)
                   - Gradle 9.3.0
@@ -33,7 +33,7 @@ import tarfile
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Any
 
-# Try importing Rich for advanced TRON TUI rendering; fallback to ANSI Engine
+# Try importing Rich for advanced Cybernetic TUI rendering; fallback to ANSI Engine
 HAS_RICH = False
 try:
     from rich.console import Console
@@ -49,26 +49,26 @@ except ImportError:
     HAS_RICH = False
 
 # -----------------------------------------------------------------------------
-# TRON COLOR SYSTEM & ANSI FALLBACK CONSTANTS
+# CYBERNETIC COLOR SYSTEM & ANSI FALLBACK CONSTANTS
 # -----------------------------------------------------------------------------
-TRON_CYAN = "\033[38;2;0;255;255m"      # Main Cyber Cyan (#00FFFF)
-TRON_BLUE = "\033[38;2;0;191;255m"     # Electric Blue (#00BFFF)
-TRON_PINK = "\033[38;2;255;0;127m"     # Neon Magenta/Pink (#FF007F)
-TRON_YELLOW = "\033[38;2;255;215;0m"   # High-Voltage Amber (#FFD700)
-TRON_GREEN = "\033[38;2;50;205;50m"    # Grid Green (#32CD32)
-TRON_RED = "\033[38;2;255;69;0m"       # Warning Crimson (#FF4500)
-TRON_GRAY = "\033[38;2;112;128;144m"   # Slate Gray (#708090)
-TRON_BOLD = "\033[1m"
-TRON_RESET = "\033[0m"
+CYBER_CYAN = "\033[38;2;0;255;255m"      # Main Cyber Cyan (#00FFFF)
+CYBER_BLUE = "\033[38;2;0;191;255m"     # Electric Blue (#00BFFF)
+CYBER_PINK = "\033[38;2;255;0;127m"     # Neon Magenta/Pink (#FF007F)
+CYBER_YELLOW = "\033[38;2;255;215;0m"   # High-Voltage Amber (#FFD700)
+CYBER_GREEN = "\033[38;2;50;205;50m"    # Grid Green (#32CD32)
+CYBER_RED = "\033[38;2;255;69;0m"       # Warning Crimson (#FF4500)
+CYBER_GRAY = "\033[38;2;112;128;144m"   # Slate Gray (#708090)
+CYBER_BOLD = "\033[1m"
+CYBER_RESET = "\033[0m"
 
-TRON_ASCII_BANNER = r"""
- █████╗ ███████╗██████╗ ███╗   ██╗███████╗██╗     ██╗██╗  ██╗
-██╔══██╗██╔════╝██╔══██╗████╗  ██║██╔════╝██║     ██║██║  ██║
-███████║█████╗  ██║  ██║██╔██╗ ██║█████╗  ██║     ██║███████║
-██╔══██║██╔══╝  ██║  ██║██║╚██╗██║██╔══╝  ██║██   ██║██╔══██║
-██║  ██║███████╗██████╔╝██║ ╚████║██║     ╚█████╔╝██║  ██║
-╚═╝  ╚═╝╚══════╝╚═════╝ ╚═╝  ╚═══╝╚═╝      ╚════╝ ╚═╝  ╚═╝
-:: TRON CYBERNETIC DEVELOPMENT KIT MANAGER :: v1.0.0 ::
+AEONFLUX_ASCII_BANNER = r"""
+ █████╗ ███████╗██████╗ ███╗   ██╗███████╗██╗     ██╗   ██╗██╗  ██╗
+██╔══██╗██╔════╝██╔══██╗████╗  ██║██╔════╝██║     ██║   ██║╚██╗██╔╝
+███████║█████╗  ██║  ██║██╔██╗ ██║█████╗  ██║     ██║   ██║ ╚████╔╝ 
+██╔══██║██╔══╝  ██║  ██║██║╚██╗██║██╔══╝  ██║     ██║   ██║ ██╔═██╗ 
+██║  ██║███████╗╚██████╔╝██║ ╚████║██║     ███████╗╚██████╔╝██╔╝  ██╗
+╚═╝  ╚═╝╚══════╝ ╚═════╝ ╚═╝  ╚═══╝╚═╝     ╚══════╝ ╚═════╝ ╚═╝  ╚═╝
+          :: CYBERNETIC DEVELOPMENT KIT MANAGER :: v1.0.0 ::
 """
 
 # Default Installation Paths & Software Matrix
@@ -88,8 +88,8 @@ REQUIRED_SDK_PACKAGES = [
     "system-images;android-34;google_apis;x86_64"
 ]
 
-class TronUI:
-    """TRON Aesthetic Terminal UI Renderer with Rich / ANSI engine."""
+class CyberUI:
+    """Cybernetic Terminal UI Renderer with Rich / ANSI engine."""
     
     def __init__(self, use_rich: bool = HAS_RICH):
         self.use_rich = use_rich
@@ -101,7 +101,7 @@ class TronUI:
     def print_banner(self):
         if self.use_rich:
             p = Panel(
-                Text(TRON_ASCII_BANNER, style="bold cyan", justify="center"),
+                Text(AEONFLUX_ASCII_BANNER, style="bold cyan", justify="center"),
                 title="[bold magenta]▲ AEONFLUX ANDROID-KIT PROVISIONER[/bold magenta]",
                 subtitle="[bold blue]CYBERNETIC ENVIRONMENT AUTOMATION[/bold blue]",
                 border_style="cyan",
@@ -109,52 +109,52 @@ class TronUI:
             )
             self.console.print(p)
         else:
-            print(f"{TRON_CYAN}{TRON_BOLD}{TRON_ASCII_BANNER}{TRON_RESET}")
-            print(f"{TRON_BLUE}==============================================================================={TRON_RESET}")
+            print(f"{CYBER_CYAN}{CYBER_BOLD}{AEONFLUX_ASCII_BANNER}{CYBER_RESET}")
+            print(f"{CYBER_BLUE}==============================================================================={CYBER_RESET}")
 
-    def print_status(self, label: str, status: str, state_color: str = TRON_CYAN, detail: str = ""):
+    def print_status(self, label: str, status: str, state_color: str = CYBER_CYAN, detail: str = ""):
         if self.use_rich:
             status_text = f"[{state_color}][ {status.upper()} ][/{state_color}]"
             self.console.print(f"  • {label:<35} {status_text} {detail}")
         else:
-            color = TRON_CYAN if state_color == "cyan" else (TRON_GREEN if state_color == "green" else (TRON_RED if state_color == "red" else TRON_YELLOW))
-            print(f"  • {label:<35} {color}[ {status.upper()} ]{TRON_RESET} {detail}")
+            color = CYBER_CYAN if state_color == "cyan" else (CYBER_GREEN if state_color == "green" else (CYBER_RED if state_color == "red" else CYBER_YELLOW))
+            print(f"  • {label:<35} {color}[ {status.upper()} ]{CYBER_RESET} {detail}")
 
     def print_header(self, title: str):
         if self.use_rich:
             self.console.print(f"\n[bold cyan]╔═══ {title.upper()} ══════════════════════════════════════════════════════════[/bold cyan]")
         else:
-            print(f"\n{TRON_CYAN}{TRON_BOLD}╔═══ {title.upper()} ══════════════════════════════════════════════════════════{TRON_RESET}")
+            print(f"\n{CYBER_CYAN}{CYBER_BOLD}╔═══ {title.upper()} ══════════════════════════════════════════════════════════{CYBER_RESET}")
 
     def print_info(self, msg: str):
         if self.use_rich:
             self.console.print(f"[blue]ℹ[/blue] {msg}")
         else:
-            print(f"{TRON_BLUE}ℹ {msg}{TRON_RESET}")
+            print(f"{CYBER_BLUE}ℹ {msg}{CYBER_RESET}")
 
     def print_success(self, msg: str):
         if self.use_rich:
             self.console.print(f"[bold green]✔[/bold green] {msg}")
         else:
-            print(f"{TRON_GREEN}{TRON_BOLD}✔ {msg}{TRON_RESET}")
+            print(f"{CYBER_GREEN}{CYBER_BOLD}✔ {msg}{CYBER_RESET}")
 
     def print_warning(self, msg: str):
         if self.use_rich:
             self.console.print(f"[bold yellow]⚠[/bold yellow] {msg}")
         else:
-            print(f"{TRON_YELLOW}{TRON_BOLD}⚠ {msg}{TRON_RESET}")
+            print(f"{CYBER_YELLOW}{CYBER_BOLD}⚠ {msg}{CYBER_RESET}")
 
     def print_error(self, msg: str):
         if self.use_rich:
             self.console.print(f"[bold red]✖[/bold red] {msg}")
         else:
-            print(f"{TRON_RED}{TRON_BOLD}✖ {msg}{TRON_RESET}")
+            print(f"{CYBER_RED}{CYBER_BOLD}✖ {msg}{CYBER_RESET}")
 
 
 class SystemAnalyzer:
     """Inspects Linux environment, hardware capabilities, and tool dependencies."""
 
-    def __init__(self, ui: TronUI):
+    def __init__(self, ui: CyberUI):
         self.ui = ui
 
     def analyze_system(self) -> Dict[str, Any]:
@@ -209,7 +209,7 @@ class SystemAnalyzer:
 class AndroidKitManager:
     """Manages downloading, extraction, SDK provisioning, launchers, and AVD setup."""
 
-    def __init__(self, kit_dir: Path, ui: TronUI):
+    def __init__(self, kit_dir: Path, ui: CyberUI):
         self.kit_dir = kit_dir
         self.jdk_dir = kit_dir / "jdk"
         self.gradle_dir = kit_dir / "gradle"
@@ -248,7 +248,6 @@ class AndroidKitManager:
         """Downloads a URL with progress reporting."""
         self.ui.print_info(f"Downloading {title} from: {url}")
         
-        # Use urllib with custom headers to handle redirects
         req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0 (AeonFlux Android-Kit Provisioner)'})
         
         with urllib.request.urlopen(req) as response, open(dest_path, 'wb') as out_file:
@@ -308,7 +307,6 @@ class AndroidKitManager:
                                 target_path.parent.mkdir(parents=True, exist_ok=True)
                                 with zip_ref.open(member) as source, open(target_path, "wb") as target:
                                     shutil.copyfileobj(source, target)
-                                # Preserve permissions
                                 mode = (member.external_attr >> 16) & 0o777
                                 if mode:
                                     os.chmod(target_path, mode)
@@ -355,7 +353,6 @@ class AndroidKitManager:
         self.download_file(GRADLE_URL, dest, "Gradle 9.3.0")
         self.extract_archive(dest, self.gradle_dir, strip_components=1)
         
-        # Ensure executable
         gradle_bin = self.gradle_dir / "bin" / "gradle"
         if gradle_bin.exists():
             gradle_bin.chmod(gradle_bin.stat().st_mode | stat.S_IEXEC)
@@ -371,17 +368,14 @@ class AndroidKitManager:
             dest = self.downloads_dir / "commandlinetools-linux.zip"
             self.download_file(CMDLINE_TOOLS_URL, dest, "Android Cmdline-Tools")
             
-            # cmdline-tools must extract into $ANDROID_HOME/cmdline-tools/latest
             latest_dir = self.sdk_dir / "cmdline-tools" / "latest"
             self.extract_archive(dest, latest_dir, strip_components=1)
 
-            # Mark executables
             for b in (latest_dir / "bin").glob("*"):
                 b.chmod(b.stat().st_mode | stat.S_IEXEC)
 
         self.ui.print_status("SDK Cmdline Tools", "INSTALLED", "green", str(sdkmanager))
 
-        # Accept SDK licenses
         self.ui.print_info("Accepting Android SDK licenses...")
         java_home = str(self.jdk_dir) if (self.jdk_dir / "bin" / "java").exists() else os.environ.get("JAVA_HOME", "")
         env = os.environ.copy()
@@ -404,7 +398,6 @@ class AndroidKitManager:
         except Exception as e:
             license_proc.kill()
 
-        # Install SDK components
         self.ui.print_header("Installing Android SDK / NDK / CMake Components")
         sdk_args = [str(sdkmanager), f"--sdk_root={self.sdk_dir}"] + REQUIRED_SDK_PACKAGES
         self.ui.print_info(f"Executing sdkmanager: {' '.join(REQUIRED_SDK_PACKAGES)}")
@@ -464,14 +457,14 @@ export GRADLE_HOME="{self.gradle_dir}"
 export ANDROID_HOME="{self.sdk_dir}"
 export ANDROID_SDK_ROOT="{self.sdk_dir}"
 # Resolve NDK Path
-if [ -f "${ANDROID_HOME}/ndk/26.1.10909125/source.properties" ]; then
-    export ANDROID_NDK_ROOT="${ANDROID_HOME}/ndk/26.1.10909125"
-elif [ -d "${ANDROID_HOME}/ndk" ]; then
-    export ANDROID_NDK_ROOT="$(find "${ANDROID_HOME}/ndk" -name "source.properties" 2>/dev/null | head -n 1 | xargs -r dirname)"
+if [ -f "${{ANDROID_HOME}}/ndk/26.1.10909125/source.properties" ]; then
+    export ANDROID_NDK_ROOT="${{ANDROID_HOME}}/ndk/26.1.10909125"
+elif [ -d "${{ANDROID_HOME}}/ndk" ]; then
+    export ANDROID_NDK_ROOT="$(find "${{ANDROID_HOME}}/ndk" -name "source.properties" 2>/dev/null | head -n 1 | xargs -r dirname)"
 fi
 
-if [ -z "${ANDROID_NDK_ROOT}" ] && [ -d "${HOME}/Android/Sdk/ndk" ]; then
-    export ANDROID_NDK_ROOT="$(find "${HOME}/Android/Sdk/ndk" -name "source.properties" 2>/dev/null | head -n 1 | xargs -r dirname)"
+if [ -z "${{ANDROID_NDK_ROOT}}" ] && [ -d "${{HOME}}/Android/Sdk/ndk" ]; then
+    export ANDROID_NDK_ROOT="$(find "${{HOME}}/Android/Sdk/ndk" -name "source.properties" 2>/dev/null | head -n 1 | xargs -r dirname)"
 fi
 export ANDROID_AVD_HOME="{self.avd_dir}"
 
@@ -480,23 +473,22 @@ export PATH="$ANDROID_KIT/bin:$JAVA_HOME/bin:$GRADLE_HOME/bin:$ANDROID_HOME/cmdl
 
 # Aliases
 alias studio="$ANDROID_KIT/android-studio"
-alias gradlew-kit="$ANDROID_KIT/gradle"
+alias gradlew-kit="$ANDROID_KIT/gradle.sh"
 alias pixel5="$ANDROID_KIT/start-pixel5.sh"
 alias pixel8="$ANDROID_KIT/start-pixel8.sh"
 
 if [ -t 1 ]; then
     echo -e "\\033[38;2;0;255;255m\\033[1m▲ [AEONFLUX ANDROID-KIT ACTIVE]\\033[0m"
-    echo -e "\\033[38;2;0;191;255m  • JAVA_HOME  :\\033[0m $JAVA_HOME"
-    echo -e "\\033[38;2;0;191;255m  • ANDROID_HOME:\\033[0m $ANDROID_HOME"
-    echo -e "\\033[38;2;0;191;255m  • NDK_ROOT    :\\033[0m $ANDROID_NDK_ROOT"
-    echo -e "\\033[38;2;0;191;255m  • GRADLE_HOME :\\033[0m $GRADLE_HOME"
+    echo -e "\\033[38;2;0;191;255m  • JAVA_HOME   :\\033[0m $JAVA_HOME"
+    echo -e "\\033[38;2;0;191;255m  • ANDROID_HOME :\\033[0m $ANDROID_HOME"
+    echo -e "\\033[38;2;0;191;255m  • NDK_ROOT     :\\033[0m $ANDROID_NDK_ROOT"
+    echo -e "\\033[38;2;0;191;255m  • GRADLE_HOME  :\\033[0m $GRADLE_HOME"
 fi
 """
         env_activate_file = self.kit_dir / "env_activate.sh"
         env_activate_file.write_text(env_activate_content)
         env_activate_file.chmod(0o755)
 
-        # Copy/Symlink activation script in project helpers directory if available
         helpers_activate = Path.cwd() / "helpers" / "activate_env.sh"
         if helpers_activate.parent.exists():
             helpers_activate.write_text(env_activate_content)
@@ -540,7 +532,6 @@ exec "{emulator_bin}" -avd Pixel_8_API_34 -gpu auto -qemu -m 4096 "$@"
 """
         }
 
-        # Bin symlink mapping (without .sh for clean binary invocation in PATH)
         bin_mapping = {
             "android-studio": "android-studio",
             "gradle.sh": "gradle",
@@ -557,7 +548,6 @@ exec "{emulator_bin}" -avd Pixel_8_API_34 -gpu auto -qemu -m 4096 "$@"
             script_path.write_text(script_content)
             script_path.chmod(0o755)
             
-            # Symlink to bin/
             bin_name = bin_mapping.get(name, name)
             bin_link = self.bin_dir / bin_name
             if bin_link.exists() or bin_link.is_symlink():
@@ -606,11 +596,9 @@ exec "{emulator_bin}" -avd Pixel_8_API_34 -gpu auto -qemu -m 4096 "$@"
             p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env)
             out, err = p.communicate(input="no\n")
 
-            avd_ini = Path.home() / ".android" / "avd" / f"{avd_name}.ini"
             avd_dir_cfg = Path.home() / ".android" / "avd" / f"{avd_name}.avd" / "config.ini"
 
             if avd_dir_cfg.exists():
-                # Fine-tune hardware parameters in config.ini
                 cfg_lines = avd_dir_cfg.read_text().splitlines()
                 updated_lines = []
                 params_to_set = {
@@ -647,7 +635,7 @@ exec "{emulator_bin}" -avd Pixel_8_API_34 -gpu auto -qemu -m 4096 "$@"
 
 
 # -----------------------------------------------------------------------------
-# MAIN CLI & INTERACTIVE TUI CONTROLLER
+# MAIN CLI & INTERACTIVE CYBERNETIC TUI CONTROLLER
 # -----------------------------------------------------------------------------
 def main():
     parser = argparse.ArgumentParser(
@@ -661,7 +649,7 @@ def main():
 
     args = parser.parse_args()
 
-    ui = TronUI()
+    ui = CyberUI()
     ui.print_banner()
 
     kit_dir = Path(args.kit_dir).expanduser().resolve()
@@ -696,21 +684,21 @@ def main():
         manager.prepare_virtual_devices()
         sys.exit(0)
 
-    # Interactive TRON TUI Menu
+    # Interactive Cybernetic TUI Menu
     while True:
-        ui.print_header("TRON Main System Operations Menu")
-        print(f"  {TRON_CYAN}[1]{TRON_RESET} Run Full Turn-Key Environment Provisioning (All Tools + Launchers + AVDs)")
-        print(f"  {TRON_CYAN}[2]{TRON_RESET} Provision Core Tools Only (JDK 17 + Gradle 9.3.0)")
-        print(f"  {TRON_CYAN}[3]{TRON_RESET} Provision Android SDK / NDK r26b / CMake 3.22.1")
-        print(f"  {TRON_CYAN}[4]{TRON_RESET} Provision Android Studio Standalone IDE")
-        print(f"  {TRON_CYAN}[5]{TRON_RESET} Provision Pixel 5 & Pixel 8 Virtual Devices (AVDs)")
-        print(f"  {TRON_CYAN}[6]{TRON_RESET} Generate Environment Activator & Turn-Key Launchers")
-        print(f"  {TRON_CYAN}[7]{TRON_RESET} Exit TRON Manager")
+        ui.print_header("Cybernetic Main System Operations Menu")
+        print(f"  {CYBER_CYAN}[1]{CYBER_RESET} Run Full Turn-Key Environment Provisioning (All Tools + Launchers + AVDs)")
+        print(f"  {CYBER_CYAN}[2]{CYBER_RESET} Provision Core Tools Only (JDK 17 + Gradle 9.3.0)")
+        print(f"  {CYBER_CYAN}[3]{CYBER_RESET} Provision Android SDK / NDK r26b / CMake 3.22.1")
+        print(f"  {CYBER_CYAN}[4]{CYBER_RESET} Provision Android Studio Standalone IDE")
+        print(f"  {CYBER_CYAN}[5]{CYBER_RESET} Provision Pixel 5 & Pixel 8 Virtual Devices (AVDs)")
+        print(f"  {CYBER_CYAN}[6]{CYBER_RESET} Generate Environment Activator & Turn-Key Launchers")
+        print(f"  {CYBER_CYAN}[7]{CYBER_RESET} Exit Cybernetic Manager")
 
         try:
-            choice = input(f"\n{TRON_CYAN}{TRON_BOLD}Select TRON Option [1-7]: {TRON_RESET}").strip()
+            choice = input(f"\n{CYBER_CYAN}{CYBER_BOLD}Select Menu Option [1-7]: {CYBER_RESET}").strip()
         except (KeyboardInterrupt, EOFError):
-            print("\nExiting TRON Manager.")
+            print("\nExiting Cybernetic Manager.")
             break
 
         if choice == "1":
@@ -732,7 +720,7 @@ def main():
         elif choice == "6":
             manager.create_launchers_and_environment()
         elif choice == "7":
-            print(f"{TRON_CYAN}Exiting TRON Manager. End of Line.{TRON_RESET}")
+            print(f"{CYBER_CYAN}Exiting Cybernetic Manager. End of Line.{CYBER_RESET}")
             break
         else:
             ui.print_warning("Invalid menu selection.")

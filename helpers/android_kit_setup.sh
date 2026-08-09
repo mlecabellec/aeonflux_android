@@ -4,13 +4,13 @@
 # ===============================================================================
 # File:        helpers/android_kit_setup.sh
 # Description: Bash launcher and native installer for Android-Kit development environment.
-#              Runs the TRON Python TUI manager if python3 is available, or provides a
+#              Runs the Cybernetic Python TUI manager if python3 is available, or provides a
 #              native bash fallback installer.
 # ===============================================================================
 
 set -e
 
-# TRON Colors
+# Cybernetic Colors
 CYAN="\033[38;2;0;255;255m"
 BLUE="\033[38;2;0;191;255m"
 PINK="\033[38;2;255;0;127m"
@@ -22,13 +22,15 @@ RESET="\033[0m"
 
 echo -e "${CYAN}${BOLD}"
 cat << "EOF"
- █████╗ ███████╗██████╗ ███╗   ██╗███████╗██╗     ██╗██╗  ██╗
-██╔══██╗██╔════╝██╔══██╗████╗  ██║██╔════╝██║     ██║██║  ██║
-███████║█████╗  ██║  ██║██╔██╗ ██║█████╗  ██║     ██║███████║
-██╔══██║██╔══╝  ██║  ██║██║╚██╗██║██╔══╝  ██║██   ██║██╔══██║
-██║  ██║███████╗██████╔╝██║ ╚████║██║     ╚█████╔╝██║  ██║
-╚═╝  ╚═╝╚══════╝╚═════╝ ╚═╝  ╚═══╝╚═╝      ╚════╝ ╚═╝  ╚═╝
-:: TRON CYBERNETIC DEVELOPMENT KIT MANAGER (BASH INTEGRATION) ::
+ ╔═════════════════════════════════════════════════════════════════════════════╗
+ ║  █████╗ ███████╗██████╗ ███╗   ██╗███████╗██╗     ██╗   ██╗██╗  ██╗        ║
+ ║ ██╔══██╗██╔════╝██╔══██╗████╗  ██║██╔════╝██║     ██║   ██║╚██╗██╔╝        ║
+ ║ ███████║█████╗  ██║  ██║██╔██╗ ██║█████╗  ██║     ██║   ██║ ╚████╔╝         ║
+ ║ ██╔══██║██╔══╝  ██║  ██║██║╚██╗██║██╔══╝  ██║     ██║   ██║ ██╔═██╗         ║
+ ║ ██║  ██║███████╗╚██████╔╝██║ ╚████║██║     ███████╗╚██████╔╝██╔╝  ██╗        ║
+ ║ ╚═╝  ╚═╝╚══════╝ ╚═════╝ ╚═╝  ╚═══╝╚═╝     ╚══════╝ ╚═════╝ ╚═╝  ╚═╝        ║
+ ║              :: CYBERNETIC DEVELOPMENT KIT MANAGER :: v1.0.0 ::             ║
+ ╚═════════════════════════════════════════════════════════════════════════════╝
 EOF
 echo -e "${RESET}"
 
@@ -37,7 +39,7 @@ PYTHON_SETUP="${SCRIPT_DIR}/android_kit_setup.py"
 
 # Check if Python 3 is available
 if command -v python3 &>/dev/null; then
-    echo -e "${GREEN}✔ Python 3 runtime detected. Executing TRON TUI Manager...${RESET}"
+    echo -e "${GREEN}✔ Python 3 runtime detected. Executing Cybernetic TUI Manager...${RESET}"
     chmod +x "$PYTHON_SETUP"
     exec python3 "$PYTHON_SETUP" "$@"
 else
