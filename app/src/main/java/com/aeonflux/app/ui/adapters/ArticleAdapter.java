@@ -84,7 +84,8 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ArticleV
         public void bind(@NonNull ArticleEntity article, OnArticleClickListener listener) {
             titleText.setText(article.title);
             String authorStr = article.author != null ? article.author : "Unknown Author";
-            authorDateText.setText(authorStr + " • " + article.publishedAt);
+            String formattedDate = formatTimestamp(article.publishedAt);
+            authorDateText.setText(authorStr + " • " + formattedDate);
             summaryText.setText(article.contentCleaned != null ? article.contentCleaned : (article.aiSummary != null ? article.aiSummary : "No content preview."));
             starredImg.setVisibility(article.isBookmarked == 1 ? View.VISIBLE : View.GONE);
 
@@ -96,6 +97,19 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ArticleV
                     android.util.Log.w("AeonFlux_ArticleAdapter", "[DEBUG-LOG] OnArticleClickListener is NULL!");
                 }
             });
+        }
+
+        @NonNull
+        private static String formatTimestamp(long publishedAt) {
+            if (publishedAt <= 0L) {
+                return "N/A";
+            }
+            try {
+                java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd-HH-mm-ss", java.util.Locale.US);
+                return sdf.format(new java.util.Date(publishedAt));
+            } catch (Exception e) {
+                return String.valueOf(publishedAt);
+            }
         }
     }
 }

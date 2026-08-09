@@ -35,5 +35,11 @@ Focuses on repository build commands, project roadmap milestones, and task logs.
 - [MainActivity UI & Feeds Tree Task](project/tasks/TSK-20260805-001.md): MainActivity dual drawer, gestures, ItemViewActivity, and Settings task.
 - [OPML Import/Export & Background RSS Fetching Task](project/tasks/TSK-20260806-001.md): OPML parsing/exporting, UI drawer commands, and WorkManager RSS fetch task.
 - [ItemViewActivity Embedded & Private WebViews Feature](specifications/FR-20260809-001.md): Action buttons, WebViewActivity, PrivateWebViewActivity with JS toggle & privacy hardening.
+- [Dynamic Media Content Detection & Playback Engine Feature](specifications/FR-20260809-002.md): UrlContentDetector, AudioPlaybackActivity with Karaoke view, VideoPlaybackActivity, and speed/jump controls.
+- [Vosk STT Engine & About Application Activity Feature](specifications/FR-20260809-003.md): VoskTranscriptEngine, AboutActivity with about.html asset, and STT toggle controls.
+- [Audio VAD Silence Detector & Background Management Feature](specifications/FR-20260809-004.md): AudioSilenceDetector VAD sentence segmenter, centered auto-scroll, 50-item buffer cap, and background auto-pause/resume lifecycle.
+
+
+
 
 

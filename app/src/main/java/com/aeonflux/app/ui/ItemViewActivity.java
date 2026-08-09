@@ -81,18 +81,77 @@ public class ItemViewActivity extends AppCompatActivity {
                 TextView summaryText = findViewById(R.id.text_item_summary);
                 TextView authorDateText = findViewById(R.id.text_item_author_date);
 
+                long rawDate = intent.getLongExtra(EXTRA_PUBLISHED_AT, 0L);
+                String formattedDate = formatTimestamp(rawDate);
                 if (titleText != null) titleText.setText(articleTitle);
                 if (summaryText != null) summaryText.setText(intent.getStringExtra(EXTRA_SUMMARY) != null ? intent.getStringExtra(EXTRA_SUMMARY) : "No summary available.");
-                if (authorDateText != null) authorDateText.setText("Author: " + (intent.getStringExtra(EXTRA_AUTHOR) != null ? intent.getStringExtra(EXTRA_AUTHOR) : "Unknown") + " • Published: " + intent.getLongExtra(EXTRA_PUBLISHED_AT, 0L));
+                if (authorDateText != null) authorDateText.setText("Author: " + (intent.getStringExtra(EXTRA_AUTHOR) != null ? intent.getStringExtra(EXTRA_AUTHOR) : "Unknown") + " • Published: " + formattedDate);
             } else {
                 android.util.Log.w("AeonFlux_ItemView", "[DEBUG-LOG] getIntent() is NULL!");
             }
 
             setupActionButtons();
+            detectAndWireMediaButtons();
 
         } catch (Exception e) {
             android.util.Log.e("AeonFlux_ItemView", "[DEBUG-LOG] FATAL EXCEPTION in ItemViewActivity onCreate!", e);
             Toast.makeText(this, "Error initializing article view", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void detectAndWireMediaButtons() {
+        try {
+            Button btnPlayAudio = findViewById(R.id.btn_play_audio);
+            Button btnPlayVideo = findViewById(R.id.btn_play_video);
+
+            String sanitizedUrl = getValidSanitizedUrl();
+            if (!sanitizedUrl.isEmpty()) {
+                com.aeonflux.app.core.util.UrlContentDetector.detectMediaTypeAsync(sanitizedUrl, mediaType -> {
+                    runOnUiThread(() -> {
+                        try {
+                            if (mediaType == com.aeonflux.app.core.util.UrlContentDetector.MediaType.AUDIO) {
+                                if (btnPlayAudio != null) {
+                                    btnPlayAudio.setVisibility(android.view.View.VISIBLE);
+                                    btnPlayAudio.setOnClickListener(v -> launchAudioPlayback(sanitizedUrl));
+                                }
+                            } else if (mediaType == com.aeonflux.app.core.util.UrlContentDetector.MediaType.VIDEO) {
+                                if (btnPlayVideo != null) {
+                                    btnPlayVideo.setVisibility(android.view.View.VISIBLE);
+                                    btnPlayVideo.setOnClickListener(v -> launchVideoPlayback(sanitizedUrl));
+                                }
+                            }
+                        } catch (Exception ex) {
+                            LOGGER.log(Level.WARNING, "[TSK-20260809-002.5] Exception updating media buttons UI.", ex);
+                        }
+                    });
+                });
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "[TSK-20260809-002.5] Exception in detectAndWireMediaButtons.", e);
+        }
+    }
+
+    private void launchAudioPlayback(String targetUrl) {
+        try {
+            Intent intent = new Intent(this, AudioPlaybackActivity.class);
+            intent.putExtra(AudioPlaybackActivity.EXTRA_AUDIO_URL, targetUrl);
+            intent.putExtra(AudioPlaybackActivity.EXTRA_AUDIO_TITLE, articleTitle);
+            startActivity(intent);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "[TSK-20260809-002.5] Error launching audio playback activity.", e);
+            Toast.makeText(this, "Unable to launch audio player", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void launchVideoPlayback(String targetUrl) {
+        try {
+            Intent intent = new Intent(this, VideoPlaybackActivity.class);
+            intent.putExtra(VideoPlaybackActivity.EXTRA_VIDEO_URL, targetUrl);
+            intent.putExtra(VideoPlaybackActivity.EXTRA_VIDEO_TITLE, articleTitle);
+            startActivity(intent);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "[TSK-20260809-002.5] Error launching video playback activity.", e);
+            Toast.makeText(this, "Unable to launch video player", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -269,5 +328,18 @@ public class ItemViewActivity extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @NonNull
+    private static String formatTimestamp(long publishedAt) {
+        if (publishedAt <= 0L) {
+            return "N/A";
+        }
+        try {
+            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd-HH-mm-ss", java.util.Locale.US);
+            return sdf.format(new java.util.Date(publishedAt));
+        } catch (Exception e) {
+            return String.valueOf(publishedAt);
+        }
     }
 }

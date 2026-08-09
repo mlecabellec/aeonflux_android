@@ -64,6 +64,21 @@
             android:exported="false"
             android:theme="@style/Theme.AeonFlux" />
 
+        <activity
+            android:name=".ui.AudioPlaybackActivity"
+            android:exported="true"
+            android:theme="@style/Theme.AeonFlux" />
+
+        <activity
+            android:name=".ui.VideoPlaybackActivity"
+            android:exported="false"
+            android:theme="@style/Theme.AeonFlux" />
+
+        <activity
+            android:name=".ui.AboutActivity"
+            android:exported="false"
+            android:theme="@style/Theme.AeonFlux" />
+
 
         <service
             android:name=".core.media.PlaybackService"

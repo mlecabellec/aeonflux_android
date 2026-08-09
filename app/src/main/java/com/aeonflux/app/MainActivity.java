@@ -271,6 +271,9 @@ public class MainActivity extends AppCompatActivity {
         } else if (id == R.id.action_settings) {
             startActivity(new Intent(this, SettingsActivity.class));
             return true;
+        } else if (id == R.id.action_about) {
+            startActivity(new Intent(this, com.aeonflux.app.ui.AboutActivity.class));
+            return true;
         } else if (id == R.id.action_toggle_label_grouping) {
             item.setChecked(!item.isChecked());
             Toast.makeText(this, item.isChecked() ? "Grouping by Labels enabled" : "Grouping by Labels disabled", Toast.LENGTH_SHORT).show();

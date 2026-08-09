@@ -19,6 +19,7 @@ Regulations governing AI agent code contribution, plans execution, and verificat
 - **Standard**: [Constraint CS-0020 AI Agent Rules](CS-0020.md)
   - AI agents must perform step-by-step verification, log and trace modifications, draft test-covered deployment plans, and request explicit human verification before deleting or committing code.
   - Requires unit and integration tests for all generated assets.
+  - **CS-0020.13 Anti-Fake Work Mandate**: Strict prohibition of simulated outputs, hardcoded template decoders, or fake mock data in production code paths. Transparent reporting of missing prerequisites required.
 
 ---
 

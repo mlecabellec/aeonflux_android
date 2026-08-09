@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About AeonFlux Client</title>
+    <style>
+        :root {
+            --bg-color: #0F172A;
+            --card-bg: #1E293B;
+            --accent-blue: #3B82F6;
+            --accent-purple: #8B5CF6;
+            --text-main: #F8FAFC;
+            --text-muted: #94A3B8;
+            --border-color: #334155;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .header-card {
+            background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+            text-align: center;
+        }
+
+        .app-title {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(90deg, #60A5FA, #A78BFA);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 0 0 8px 0;
+        }
+
+        .app-subtitle {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin: 0 0 16px 0;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 9999px;
+            background-color: rgba(59, 130, 246, 0.2);
+            color: #60A5FA;
+            font-size: 12px;
+            font-weight: 600;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--accent-blue);
+            margin: 24px 0 12px 0;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 6px;
+        }
+
+        .dep-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .dep-name {
+            font-size: 16px;
+            font-weight: 700;
+            color: #F1F5F9;
+        }
+
+        .dep-meta {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .dep-license {
+            display: inline-block;
+            margin-top: 8px;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 4px;
+            background-color: #334155;
+            color: #38BDF8;
+        }
+
+        footer {
+            margin-top: 32px;
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border-color);
+            padding-top: 16px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-card">
+        <h1 class="app-title">AeonFlux Android Client</h1>
+        <p class="app-subtitle">Industrial Infrastructure & News Reader Client Platform</p>
+        <span class="badge">Version 1.0.0 (Build 20260809)</span>
+    </div>
+
+    <div class="section-title">Application Overview</div>
+    <p>
+        AeonFlux is a high-performance, reactive Android client featuring offline Room database synchronization, OPML feed ingestion, background WorkManager RSS fetching, embedded/private browser engines, and dynamic media playback with on-device Vosk speech-to-text karaoke transcription.
+    </p>
+
+    <div class="section-title">Third-Party Open Source Software & Licenses</div>
+
+    <div class="dep-card">
+        <div class="dep-name">OpenAI Whisper Engine (whisper.cpp)</div>
+        <div class="dep-meta">Author: OpenAI & whisper.cpp Community</div>
+        <div class="dep-meta">Purpose: 100% On-device, neural speech-to-text base model (ggml-base.bin) transcript engine.</div>
+        <span class="dep-license">MIT License</span>
+    </div>
+
+    <div class="dep-card">
+        <div class="dep-name">Android Jetpack & Material Components</div>
+        <div class="dep-meta">Author: Google LLC & Android Open Source Project (AOSP)</div>
+        <div class="dep-meta">Purpose: AppCompat, RecyclerView, CardView, ViewBinding, WorkManager.</div>
+        <span class="dep-license">Apache License 2.0</span>
+    </div>
+
+    <div class="dep-card">
+        <div class="dep-name">Dagger Hilt</div>
+        <div class="dep-meta">Author: Google LLC</div>
+        <div class="dep-meta">Purpose: Dependency Injection framework for Android components.</div>
+        <span class="dep-license">Apache License 2.0</span>
+    </div>
+
+    <div class="dep-card">
+        <div class="dep-name">Room Persistence Library</div>
+        <div class="dep-meta">Author: Google LLC</div>
+        <div class="dep-meta">Purpose: Object-relational mapping (ORM) over SQLite database.</div>
+        <span class="dep-license">Apache License 2.0</span>
+    </div>
+
+    <div class="dep-card">
+        <div class="dep-name">DeepLearning4j & ND4J</div>
+        <div class="dep-meta">Author: Konduit Inc. & Eclipse Foundation</div>
+        <div class="dep-meta">Purpose: On-device tensor math & signal processing algorithms.</div>
+        <span class="dep-license">Apache License 2.0</span>
+    </div>
+
+    <div class="dep-card">
+        <div class="dep-name">ZeroMQ / JZMQ</div>
+        <div class="dep-meta">Author: ZeroMQ Community & iMatix Corporation</div>
+        <div class="dep-meta">Purpose: Industrial Data-over-Sound transport protocol.</div>
+        <span class="dep-license">LGPLv3 / MPLv2</span>
+    </div>
+
+    <footer>
+        <p>© 2026 AeonFlux Platform Team. All rights reserved.</p>
+    </footer>
+
+</body>
+</html>

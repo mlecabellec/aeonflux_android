@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  [CS-0010] [CS-0020] Layout for Karaoke Speech-to-Text Transcript Item.
+  Reference: FR-20260809-002 / TSK-20260809-002.3
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/container_transcript_line"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="8dp"
+    android:background="?android:attr/selectableItemBackground">
+
+    <TextView
+        android:id="@+id/text_timestamp"
+        android:layout_width="60dp"
+        android:layout_height="wrap_content"
+        android:textColor="#3B82F6"
+        android:textSize="12sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/text_line_content"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_marginStart="8dp"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="15sp" />
+
+</LinearLayout>
