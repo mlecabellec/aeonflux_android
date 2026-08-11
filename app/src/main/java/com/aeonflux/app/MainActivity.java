@@ -35,7 +35,9 @@ import com.aeonflux.app.ui.adapters.SourceTreeAdapter;
 
 import dagger.hilt.android.AndroidEntryPoint;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @AndroidEntryPoint
 public class MainActivity extends AppCompatActivity {
@@ -49,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
     private ArticleAdapter articleAdapter;
     private SourceTreeAdapter sourceTreeAdapter;
     private final List<ArticleEntity> sampleArticles = new ArrayList<>();
+    private boolean isLabelGroupingEnabled = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -182,19 +185,53 @@ public class MainActivity extends AppCompatActivity {
 
         databaseService.getSourcesWithUnreadCountLiveData().observe(this, sourcesWithUnread -> {
             List<SourceGroupDTO> groups = new ArrayList<>();
-            SourceGroupDTO defaultGroup = new SourceGroupDTO("grp_1", "All Feeds & Sources", "#3B82F6");
 
             if (sourcesWithUnread != null && !sourcesWithUnread.isEmpty()) {
-                for (SourceWithUnreadCount swu : sourcesWithUnread) {
-                    defaultGroup.addSource(swu);
+                if (isLabelGroupingEnabled) {
+                    Map<String, SourceGroupDTO> groupMap = new LinkedHashMap<>();
+                    SourceGroupDTO defaultGroup = null;
+
+                    for (SourceWithUnreadCount swu : sourcesWithUnread) {
+                        String label = (swu.source != null && swu.source.label != null && !swu.source.label.trim().isEmpty())
+                                ? swu.source.label.trim() : null;
+                        if (label != null) {
+                            SourceGroupDTO grp = groupMap.get(label);
+                            if (grp == null) {
+                                String grpId = "grp_" + label.toLowerCase().replaceAll("[^a-z0-9]", "_");
+                                grp = new SourceGroupDTO(grpId, label, "#3B82F6");
+                                groupMap.put(label, grp);
+                            }
+                            grp.addSource(swu);
+                        } else {
+                            if (defaultGroup == null) {
+                                defaultGroup = new SourceGroupDTO("grp_default", "Default Group", "#64748B");
+                            }
+                            defaultGroup.addSource(swu);
+                        }
+                    }
+
+                    groups.addAll(groupMap.values());
+                    if (defaultGroup != null) {
+                        groups.add(defaultGroup);
+                    }
+                } else {
+                    SourceGroupDTO allGroup = new SourceGroupDTO("grp_all", "All Feeds & Sources", "#3B82F6");
+                    for (SourceWithUnreadCount swu : sourcesWithUnread) {
+                        allGroup.addSource(swu);
+                    }
+                    groups.add(allGroup);
                 }
             } else {
+                SourceGroupDTO defaultGroup = new SourceGroupDTO("grp_1", "All Feeds & Sources", "#3B82F6");
                 SourceEntity s1 = new SourceEntity("src_1", "https://news.ycombinator.com/rss", "Hacker News", "Tech news", null, "RSS", 60, System.currentTimeMillis(), 0);
                 defaultGroup.addSource(new SourceWithUnreadCount(s1, 3, System.currentTimeMillis()));
+                groups.add(defaultGroup);
             }
 
-            groups.add(defaultGroup);
             sourceTreeAdapter.setGroups(groups);
+            for (int i = 0; i < groups.size(); i++) {
+                expandableListView.expandGroup(i);
+            }
         });
 
         expandableListView.setOnChildClickListener((parent, v, groupPosition, childPosition, id) -> {
@@ -276,7 +313,9 @@ public class MainActivity extends AppCompatActivity {
             return true;
         } else if (id == R.id.action_toggle_label_grouping) {
             item.setChecked(!item.isChecked());
-            Toast.makeText(this, item.isChecked() ? "Grouping by Labels enabled" : "Grouping by Labels disabled", Toast.LENGTH_SHORT).show();
+            isLabelGroupingEnabled = item.isChecked();
+            setupSourceTree();
+            Toast.makeText(this, isLabelGroupingEnabled ? "Grouping by Labels enabled" : "Grouping by Labels disabled", Toast.LENGTH_SHORT).show();
             return true;
         } else if (id == R.id.action_sort_item_timestamp_asc) {
             isAscendingSort = true;

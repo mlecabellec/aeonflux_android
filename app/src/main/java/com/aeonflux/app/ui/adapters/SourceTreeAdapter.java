@@ -99,9 +99,50 @@ public class SourceTreeAdapter extends BaseExpandableListAdapter {
 
         TextView sourceName = convertView.findViewById(R.id.text_source_name);
         TextView sourceUnread = convertView.findViewById(R.id.text_source_unread);
+        android.widget.ImageView sourceIcon = convertView.findViewById(R.id.image_source_icon);
 
-        sourceName.setText(item.source.title);
+        sourceName.setText(item.source != null && item.source.title != null ? item.source.title : "Feed");
         sourceUnread.setText(String.valueOf(item.unreadCount));
+
+        if (sourceIcon != null) {
+            sourceIcon.setImageResource(android.R.drawable.ic_menu_compass);
+            String iconUrl = (item.source != null) ? item.source.iconUrl : null;
+            if ((iconUrl == null || iconUrl.trim().isEmpty()) && item.source != null && item.source.url != null && !item.source.url.trim().isEmpty()) {
+                try {
+                    android.net.Uri uri = android.net.Uri.parse(item.source.url);
+                    String host = uri.getHost();
+                    if (host != null && !host.trim().isEmpty()) {
+                        iconUrl = "https://" + host + "/favicon.ico";
+                    }
+                } catch (Exception ignored) {}
+            }
+
+            if (iconUrl != null && !iconUrl.trim().isEmpty()) {
+                final String finalUrl = iconUrl;
+                sourceIcon.setTag(finalUrl);
+                java.util.concurrent.Executors.newSingleThreadExecutor().execute(() -> {
+                    try {
+                        java.net.URL url = new java.net.URL(finalUrl);
+                        java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
+                        conn.setConnectTimeout(3000);
+                        conn.setReadTimeout(3000);
+                        conn.setInstanceFollowRedirects(true);
+                        if (conn.getResponseCode() == 200) {
+                            try (java.io.InputStream is = conn.getInputStream()) {
+                                final android.graphics.Bitmap bmp = android.graphics.BitmapFactory.decodeStream(is);
+                                if (bmp != null) {
+                                    new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
+                                        if (finalUrl.equals(sourceIcon.getTag())) {
+                                            sourceIcon.setImageBitmap(bmp);
+                                        }
+                                    });
+                                }
+                            }
+                        }
+                    } catch (Exception ignored) {}
+                });
+            }
+        }
 
         return convertView;
     }

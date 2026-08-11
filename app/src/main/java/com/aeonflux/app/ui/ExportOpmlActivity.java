@@ -20,6 +20,7 @@ import com.aeonflux.app.core.opml.OpmlExporter;
 
 import dagger.hilt.android.AndroidEntryPoint;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -69,7 +70,12 @@ public class ExportOpmlActivity extends AppCompatActivity {
 
                 List<SourceEntity> allSources = databaseService.getAllSources();
                 Map<String, List<SourceEntity>> map = new HashMap<>();
-                map.put("Feeds", allSources);
+                if (allSources != null) {
+                    for (SourceEntity s : allSources) {
+                        String cat = (s.label != null && !s.label.trim().isEmpty()) ? s.label.trim() : "Uncategorized";
+                        map.computeIfAbsent(cat, k -> new ArrayList<>()).add(s);
+                    }
+                }
 
                 OpmlExporter exporter = new OpmlExporter();
                 exporter.export(map, outputStream);

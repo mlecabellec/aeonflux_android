@@ -37,6 +37,7 @@ public class DatabaseModule {
     public AppDatabase provideAppDatabase(@ApplicationContext Context context) {
         return Room.databaseBuilder(context, AppDatabase.class, "aeonflux.db")
                    .addCallback(AppDatabase.SEED_CALLBACK)
+                   .addMigrations(AppDatabase.MIGRATION_3_4)
                    .fallbackToDestructiveMigration()
                    .build();
     }

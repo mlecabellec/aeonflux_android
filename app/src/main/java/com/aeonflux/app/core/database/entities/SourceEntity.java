@@ -31,6 +31,9 @@ public class SourceEntity {
     @ColumnInfo(name = "icon_url")
     public String iconUrl;
 
+    @ColumnInfo(name = "label")
+    public String label; // OPML category or user-assigned feed label
+
     @ColumnInfo(name = "source_type")
     @NonNull
     public String sourceType; // 'RSS', 'PODCAST', 'BLUESKY'
@@ -58,6 +61,7 @@ public class SourceEntity {
         this.id = "";
         this.url = "";
         this.title = "";
+        this.label = "";
         this.sourceType = "RSS";
         this.cronExpression = "0 */1 * * *";
         this.lastFetchStatus = "PENDING";
@@ -116,6 +120,7 @@ public class SourceEntity {
                Objects.equals(title, that.title) &&
                Objects.equals(description, that.description) &&
                Objects.equals(iconUrl, that.iconUrl) &&
+               Objects.equals(label, that.label) &&
                Objects.equals(sourceType, that.sourceType) &&
                Objects.equals(lastRefreshedAt, that.lastRefreshedAt) &&
                Objects.equals(cronExpression, that.cronExpression) &&
@@ -125,7 +130,7 @@ public class SourceEntity {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, url, title, description, iconUrl, sourceType, refreshIntervalMinutes, lastRefreshedAt, isContributedToGae, cronExpression, lastFetchStatus, nextFetchTimestamp);
+        return Objects.hash(id, url, title, description, iconUrl, label, sourceType, refreshIntervalMinutes, lastRefreshedAt, isContributedToGae, cronExpression, lastFetchStatus, nextFetchTimestamp);
     }
 }
 

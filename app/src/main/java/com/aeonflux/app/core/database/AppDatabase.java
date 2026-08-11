@@ -43,10 +43,17 @@ import java.util.concurrent.Executors;
         SourceSecretEntity.class,
         SettingEntity.class
     },
-    version = 3,
+    version = 4,
     exportSchema = false
 )
 public abstract class AppDatabase extends RoomDatabase {
+
+    public static final androidx.room.migration.Migration MIGRATION_3_4 = new androidx.room.migration.Migration(3, 4) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("ALTER TABLE sources ADD COLUMN label TEXT");
+        }
+    };
 
     public abstract SourceDao sourceDao();
     public abstract ArticleDao articleDao();

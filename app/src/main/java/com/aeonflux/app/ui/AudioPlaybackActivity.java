@@ -197,6 +197,7 @@ public class AudioPlaybackActivity extends AppCompatActivity {
                     @Override
                     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                         if (fromUser && playerEngine != null) {
+                            fromUserSeeking = true;
                             playerEngine.seekTo(progress);
                         }
                     }
@@ -205,7 +206,14 @@ public class AudioPlaybackActivity extends AppCompatActivity {
                     public void onStartTrackingTouch(SeekBar seekBar) {}
 
                     @Override
-                    public void onStopTrackingTouch(SeekBar seekBar) {}
+                    public void onStopTrackingTouch(SeekBar seekBar) {
+                        if (fromUserSeeking && playerEngine != null && whisperEngine != null && whisperEngine.isEnabled()) {
+                            fromUserSeeking = false;
+                            long currentPos = playerEngine.getCurrentPosition();
+                            whisperEngine.cancelCurrentTranscription();
+                            updateTranscriptDisplay(currentPos);
+                        }
+                    }
                 });
             }
 
@@ -282,7 +290,13 @@ public class AudioPlaybackActivity extends AppCompatActivity {
 
     private final java.util.concurrent.ExecutorService bgExecutor = java.util.concurrent.Executors.newSingleThreadExecutor();
 
+    private boolean fromUserSeeking = false;
+
     private void updateTranscriptDisplay() {
+        updateTranscriptDisplay(0L);
+    }
+
+    private void updateTranscriptDisplay(long startOffsetMs) {
         if (recyclerTranscript == null || transcriptAdapter == null) return;
 
         if (!whisperEngine.isEnabled()) {
@@ -302,8 +316,8 @@ public class AudioPlaybackActivity extends AppCompatActivity {
 
         bgExecutor.execute(() -> {
             try {
-                LOGGER.info("[BG-STT-EXEC] Running Whisper STT extraction on background thread...");
-                whisperEngine.generateTranscriptForAudio(currentUrl, currentTitle, duration, (lines, decodedCount, totalCount) -> {
+                LOGGER.info("[BG-STT-EXEC] Running Whisper STT extraction on background thread from offset " + startOffsetMs + "ms...");
+                whisperEngine.generateTranscriptForAudio(currentUrl, currentTitle, duration, startOffsetMs, (lines, decodedCount, totalCount) -> {
                     runOnUiThread(() -> {
                         if (transcriptAdapter != null && !lines.isEmpty()) {
                             transcriptAdapter.setLines(lines);
@@ -336,6 +350,10 @@ public class AudioPlaybackActivity extends AppCompatActivity {
             if (playerEngine != null) {
                 long target = playerEngine.getCurrentPosition() + deltaMs;
                 playerEngine.seekTo(target);
+                if (whisperEngine != null && whisperEngine.isEnabled()) {
+                    whisperEngine.cancelCurrentTranscription();
+                    updateTranscriptDisplay(target);
+                }
                 LOGGER.fine("[TSK-20260809-002.3] Relative seek by " + deltaMs + " ms to " + target + " ms");
             }
         } catch (Exception e) {

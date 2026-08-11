@@ -1,16 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  [CS-0010] Child source/feed item layout for tree ExpandableListView
+  [CS-0010] [CS-0030] Child source/feed item layout for tree ExpandableListView
+  Reference: TSK-20260805-001 - Enhanced feed item with icon and 130% height (minHeight 56dp)
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:minHeight="56dp"
+    android:gravity="center_vertical"
     android:orientation="horizontal"
     android:paddingStart="24dp"
     android:paddingEnd="12dp"
-    android:paddingTop="8dp"
-    android:paddingBottom="8dp"
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp"
     android:background="?android:attr/selectableItemBackground">
+
+    <ImageView
+        android:id="@+id/image_source_icon"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:layout_marginEnd="12dp"
+        android:contentDescription="Feed Icon"
+        android:scaleType="fitCenter"
+        android:src="@android:drawable/ic_menu_compass" />
 
     <TextView
         android:id="@+id/text_source_name"
@@ -18,13 +30,15 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:text="Source Name"
-        android:textSize="14sp" />
+        android:textSize="14sp"
+        android:textColor="#1E293B" />
 
     <TextView
         android:id="@+id/text_source_unread"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="0"
-        android:textSize="12sp" />
+        android:textSize="12sp"
+        android:textColor="#64748B" />
 
 </LinearLayout>

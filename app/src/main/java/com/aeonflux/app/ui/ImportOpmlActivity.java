@@ -157,6 +157,9 @@ public class ImportOpmlActivity extends AppCompatActivity {
 
             String id = "src_" + UUID.randomUUID().toString().substring(0, 8);
             SourceEntity source = new SourceEntity(id, url, item.getTitle(), item.getText(), null, "RSS", 60, System.currentTimeMillis(), 0);
+            if (item.getCategory() != null && !item.getCategory().trim().isEmpty()) {
+                source.label = item.getCategory().trim();
+            }
             databaseService.insertSource(source);
 
             if (item.getCategory() != null && !item.getCategory().trim().isEmpty()) {

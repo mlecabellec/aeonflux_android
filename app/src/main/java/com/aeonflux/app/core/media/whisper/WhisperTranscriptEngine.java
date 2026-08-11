@@ -120,10 +120,22 @@ public class WhisperTranscriptEngine {
         return generateTranscriptForAudio(audioUrl, audioTitle, durationMs, null);
     }
 
+    private volatile boolean isCancelled = false;
+
+    public void cancelCurrentTranscription() {
+        this.isCancelled = true;
+    }
+
     @NonNull
     public List<AudioTranscriptLine> generateTranscriptForAudio(@Nullable String audioUrl, @Nullable String audioTitle, long durationMs, @Nullable SegmentCallback callback) {
-        logDebug("AeonFlux_Whisper_Diag", String.format(Locale.US, "[WHISPER-CHAIN-START] URL: '%s' | Title: '%s' | Duration: %dms (%02d:%02d) | Lang: '%s' | EngineEnabled: %b",
-                (audioUrl != null ? audioUrl : ""), (audioTitle != null ? audioTitle : ""), durationMs, (durationMs / 60000L), ((durationMs % 60000L) / 1000L), selectedLanguageTag, isEnabled));
+        return generateTranscriptForAudio(audioUrl, audioTitle, durationMs, 0L, callback);
+    }
+
+    @NonNull
+    public List<AudioTranscriptLine> generateTranscriptForAudio(@Nullable String audioUrl, @Nullable String audioTitle, long durationMs, long startOffsetMs, @Nullable SegmentCallback callback) {
+        this.isCancelled = false;
+        logDebug("AeonFlux_Whisper_Diag", String.format(Locale.US, "[WHISPER-CHAIN-START] URL: '%s' | Title: '%s' | Duration: %dms | StartOffset: %dms | Lang: '%s' | EngineEnabled: %b",
+                (audioUrl != null ? audioUrl : ""), (audioTitle != null ? audioTitle : ""), durationMs, startOffsetMs, selectedLanguageTag, isEnabled));
 
         if (!isEnabled) {
             logDebug("AeonFlux_Whisper_Diag", "[WHISPER-CHAIN-START] Engine is DISABLED. Returning empty transcript list.");
@@ -134,9 +146,6 @@ public class WhisperTranscriptEngine {
         try {
             long maxTime = durationMs > 0 ? durationMs : 300000L;
 
-            // STEP 1: Run AudioSilenceDetector VAD pipeline on the full duration timeline.
-            // A synthetic silence buffer is used solely to produce time boundaries — no audio
-            // data is pre-buffered here, avoiding the former 16MB memory cap.
             List<AudioSegment> vadSegments = silenceDetector.detectSentencesAndSplit(maxTime);
             logDebug("AeonFlux_Whisper_Diag", String.format(Locale.US,
                     "[WHISPER-VAD-PIPELINE] VAD segmenter generated %d audio chunks across %dms timeline.",
@@ -151,7 +160,15 @@ public class WhisperTranscriptEngine {
             int maxSegmentsToProcess = Math.min(vadSegments.size(), 30);
 
             for (int i = 0; i < maxSegmentsToProcess; i++) {
+                if (isCancelled) {
+                    logDebug("AeonFlux_Whisper_Diag", "[WHISPER-CHAIN-CANCELLED] Transcription chain interrupted by user seek.");
+                    break;
+                }
+
                 AudioSegment segment = vadSegments.get(i);
+                if (segment.endMs < startOffsetMs) {
+                    continue; // Skip segments preceding the seek timestamp
+                }
 
                 // Guard: VAD segments must not exceed the extractor's hard chunk limit.
                 // extractChunkPcm() will clamp internally, but we surface the anomaly here too.
