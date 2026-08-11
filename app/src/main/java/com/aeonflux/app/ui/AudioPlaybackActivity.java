@@ -122,7 +122,8 @@ public class AudioPlaybackActivity extends AppCompatActivity {
         if (titleView != null) titleView.setText(audioTitle);
         if (urlView != null) urlView.setText(audioUrl);
 
-        updateTranscriptDisplay();
+        // NOTE: Do NOT call updateTranscriptDisplay() here — duration is not yet resolved.
+        // Transcription is started inside onPrepared() once MediaPlayer has the real duration.
         startActiveAudioStream(this.audioUrl, this.audioTitle);
     }
 
@@ -143,6 +144,7 @@ public class AudioPlaybackActivity extends AppCompatActivity {
                     LOGGER.info("[ACTIVE-STREAM-ORCHESTRATOR] Active player prepared for: " + title + " (" + url + ")");
                     playerEngine.play();
                     updatePlayPauseButtonLabel();
+                    // Duration is now resolved — safe to start Whisper STT chain.
                     updateTranscriptDisplay();
                     if (url != null && !url.isEmpty()) {
                         com.aeonflux.app.core.media.MediaNotificationHelper.showMediaNotification(

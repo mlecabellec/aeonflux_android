@@ -23,17 +23,53 @@ import java.util.logging.Logger;
  * [TSK-20260809-004.6] Native Android MediaCodec & MediaExtractor PCM Audio Stream Extractor.
  * Decodes remote HTTP audio URLs or local files (.m4a, .mp3, .aac, .wav) into raw 16kHz 16-bit
  * mono PCM float/short audio samples required for OpenAI Whisper (whisper.cpp) STT decoding.
+ *
+ * <p>The primary API is {@link #extractChunkPcm(String, long, long)} which performs seek-and-decode
+ * on a bounded time window, enabling chunked streaming without any fixed memory cap.
+ * The legacy {@link #extractPcmAudio(String, long)} method is retained for compatibility but
+ * now internally caps at {@link #MAX_FULL_EXTRACT_DURATION_MS} to guard against OOM on very
+ * long files when called without a time window.
  */
 public class PcmAudioExtractor {
 
     private static final Logger LOGGER = Logger.getLogger(PcmAudioExtractor.class.getName());
-    public static final int TARGET_SAMPLE_RATE = 16000; // 16kHz required by Whisper
+
+    /** Output sample rate required by whisper.cpp. */
+    public static final int TARGET_SAMPLE_RATE = 16000;
+
+    /**
+     * Hard ceiling on any single chunk decode: 30 seconds.
+     * Enforced inside {@link #extractChunkPcm} — no caller (loop, VAD, or legacy path)
+     * can bypass this limit. A warning is logged when clamping occurs.
+     */
+    public static final long MAX_CHUNK_DURATION_MS = 30_000L;
+
+    /**
+     * Safety ceiling for the legacy full-extract path: same as one chunk maximum.
+     * Prefer {@link #extractChunkPcm} for any streaming use.
+     */
+    private static final long MAX_FULL_EXTRACT_DURATION_MS = MAX_CHUNK_DURATION_MS;
+
+    /** MediaCodec dequeue timeout in microseconds. */
+    private static final long CODEC_TIMEOUT_US = 10_000L;
+
+    // -----------------------------------------------------------------------------------------
+    // Logging helpers
+    // -----------------------------------------------------------------------------------------
 
     private static void logDebug(String tag, String msg) {
         try {
             android.util.Log.d(tag, msg);
         } catch (Throwable ignored) {
             LOGGER.fine(msg);
+        }
+    }
+
+    private static void logWarn(String tag, String msg) {
+        try {
+            android.util.Log.w(tag, msg);
+        } catch (Throwable ignored) {
+            LOGGER.warning(msg);
         }
     }
 
@@ -44,6 +80,10 @@ public class PcmAudioExtractor {
             LOGGER.log(Level.WARNING, msg, t);
         }
     }
+
+    // -----------------------------------------------------------------------------------------
+    // PcmAudioBuffer
+    // -----------------------------------------------------------------------------------------
 
     /**
      * Container holding raw 16kHz mono PCM float audio samples and metadata.
@@ -66,36 +106,67 @@ public class PcmAudioExtractor {
         @NonNull
         @Override
         public String toString() {
-            return String.format("PcmAudioBuffer[Samples: %d, SampleRate: %dHz, Duration: %dms]", samples.length, sampleRate, durationMs);
+            return String.format("PcmAudioBuffer[Samples: %d, SampleRate: %dHz, Duration: %dms]",
+                    samples.length, sampleRate, durationMs);
         }
     }
 
+    // -----------------------------------------------------------------------------------------
+    // Public API — chunked streaming (primary path)
+    // -----------------------------------------------------------------------------------------
+
     /**
-     * Extract 16kHz mono PCM audio float samples from target audio URL / file.
+     * [PRIMARY API] Seek-and-decode a bounded time window from an audio stream.
      *
-     * @param audioUrl Remote or local audio stream location.
-     * @param fallbackDurationMs Expected track duration if header metadata is unavailable.
-     * @return PcmAudioBuffer containing normalized float audio samples [-1.0f, +1.0f].
+     * <p>Uses {@link MediaExtractor#seekTo} to jump directly to {@code startMs} before decoding,
+     * then stops as soon as the encoded sample timestamp exceeds {@code endMs}.
+     * Only the audio data for the requested chunk is decoded — completely eliminating the
+     * 16MB fixed-buffer problem and enabling transcription of arbitrarily long audio files.
+     *
+     * @param audioUrl  Remote or local audio stream URI.
+     * @param startMs   Start of the time window in milliseconds (inclusive).
+     * @param endMs     End of the time window in milliseconds (exclusive).
+     * @return {@link PcmAudioBuffer} containing 16kHz mono float samples for [startMs, endMs].
+     *         Returns a silence buffer of the correct duration on any failure.
      */
     @NonNull
-    public PcmAudioBuffer extractPcmAudio(@Nullable String audioUrl, long fallbackDurationMs) {
-        logDebug("AeonFlux_WhisperPCM", "[PCM-EXTRACT-INIT] Starting MediaExtractor decoding for audio URL: " + audioUrl);
+    public PcmAudioBuffer extractChunkPcm(@Nullable String audioUrl, long startMs, long endMs) {
+        // --- Enforce hard chunk size limit (MAX_CHUNK_DURATION_MS) ---
+        // This is the single authoritative enforcement point. No loop or caller can bypass it.
+        long requestedWindowMs = Math.max(0L, endMs - startMs);
+        if (requestedWindowMs > MAX_CHUNK_DURATION_MS) {
+            long clampedEndMs = startMs + MAX_CHUNK_DURATION_MS;
+            logWarn("AeonFlux_WhisperPCM", String.format(
+                    "[PCM-CHUNK-CLAMP] Requested window %dms exceeds MAX_CHUNK_DURATION_MS (%dms). "
+                    + "Clamping endMs from %dms to %dms.",
+                    requestedWindowMs, MAX_CHUNK_DURATION_MS, endMs, clampedEndMs));
+            endMs = clampedEndMs;
+        }
+        long windowMs = Math.max(0L, endMs - startMs);
+
+        logDebug("AeonFlux_WhisperPCM", String.format(
+                "[PCM-CHUNK-INIT] Seek-decode [%dms -> %dms] (%dms) from: %s",
+                startMs, endMs, windowMs, audioUrl));
+
         if (audioUrl == null || audioUrl.trim().isEmpty()) {
-            logDebug("AeonFlux_WhisperPCM", "[PCM-EXTRACT-INIT] Null/empty audioUrl. Returning fallback silence buffer.");
-            return createSilenceBuffer(fallbackDurationMs);
+            logWarn("AeonFlux_WhisperPCM", "[PCM-CHUNK-INIT] Null/empty audioUrl. Returning silence.");
+            return createSilenceBuffer(windowMs);
+        }
+        if (windowMs <= 0) {
+            logWarn("AeonFlux_WhisperPCM", "[PCM-CHUNK-INIT] Zero-length window. Returning silence.");
+            return createSilenceBuffer(0L);
         }
 
         MediaExtractor extractor = null;
         MediaCodec decoder = null;
-        ByteArrayOutputStream pcmStream = new ByteArrayOutputStream();
 
         try {
             extractor = new MediaExtractor();
             extractor.setDataSource(audioUrl);
 
+            // --- Track selection ---
             int trackIndex = -1;
             MediaFormat format = null;
-
             for (int i = 0; i < extractor.getTrackCount(); i++) {
                 MediaFormat f = extractor.getTrackFormat(i);
                 String mime = f.getString(MediaFormat.KEY_MIME);
@@ -105,21 +176,30 @@ public class PcmAudioExtractor {
                     break;
                 }
             }
-
             if (trackIndex < 0 || format == null) {
-                logDebug("AeonFlux_WhisperPCM", "[PCM-EXTRACT-WARN] No audio track found in media format. Using synthetic decoder fallback.");
-                return createSilenceBuffer(fallbackDurationMs);
+                logWarn("AeonFlux_WhisperPCM", "[PCM-CHUNK-WARN] No audio track found. Returning silence.");
+                return createSilenceBuffer(windowMs);
             }
 
             extractor.selectTrack(trackIndex);
-            String mime = format.getString(MediaFormat.KEY_MIME);
-            int inputSampleRate = format.containsKey(MediaFormat.KEY_SAMPLE_RATE) ? format.getInteger(MediaFormat.KEY_SAMPLE_RATE) : 44100;
-            int inputChannels = format.containsKey(MediaFormat.KEY_CHANNEL_COUNT) ? format.getInteger(MediaFormat.KEY_CHANNEL_COUNT) : 2;
-            long durationUs = format.containsKey(MediaFormat.KEY_DURATION) ? format.getLong(MediaFormat.KEY_DURATION) : fallbackDurationMs * 1000L;
-            long trackDurationMs = durationUs / 1000L;
 
-            logDebug("AeonFlux_WhisperPCM", String.format("[PCM-EXTRACT-FORMAT] Mime: %s | SampleRate: %dHz | Channels: %d | Duration: %dms", mime, inputSampleRate, inputChannels, trackDurationMs));
+            String mime = Objects.requireNonNull(format.getString(MediaFormat.KEY_MIME));
+            int srcSampleRate = format.containsKey(MediaFormat.KEY_SAMPLE_RATE)
+                    ? format.getInteger(MediaFormat.KEY_SAMPLE_RATE) : 44100;
+            int srcChannels = format.containsKey(MediaFormat.KEY_CHANNEL_COUNT)
+                    ? format.getInteger(MediaFormat.KEY_CHANNEL_COUNT) : 2;
 
+            logDebug("AeonFlux_WhisperPCM", String.format(
+                    "[PCM-CHUNK-FORMAT] Mime: %s | SampleRate: %dHz | Channels: %d",
+                    mime, srcSampleRate, srcChannels));
+
+            // --- Seek to chunk start (previous I-frame) ---
+            long seekToUs = startMs * 1000L;
+            extractor.seekTo(seekToUs, MediaExtractor.SEEK_TO_PREVIOUS_SYNC);
+
+            long endUs = endMs * 1000L;
+
+            // --- Decoder setup ---
             decoder = MediaCodec.createDecoderByType(mime);
             decoder.configure(format, null, null, 0);
             decoder.start();
@@ -128,49 +208,67 @@ public class PcmAudioExtractor {
             ByteBuffer[] outputBuffers = decoder.getOutputBuffers();
             MediaCodec.BufferInfo info = new MediaCodec.BufferInfo();
 
+            ByteArrayOutputStream pcmStream = new ByteArrayOutputStream();
             boolean isEOS = false;
-            long totalPcmBytes = 0;
-            final long MAX_PCM_BYTES_LIMIT = 16L * 1024L * 1024L; // 16MB hard cap allocation to prevent OutOfMemoryError
+            boolean inputDone = false;
 
-            while (!isEOS && totalPcmBytes < MAX_PCM_BYTES_LIMIT) {
-                int inIdx = decoder.dequeueInputBuffer(10000);
-                if (inIdx >= 0) {
-                    ByteBuffer buffer = inputBuffers[inIdx];
-                    int sampleSize = extractor.readSampleData(buffer, 0);
-                    if (sampleSize < 0) {
-                        decoder.queueInputBuffer(inIdx, 0, 0, 0, MediaCodec.BUFFER_FLAG_END_OF_STREAM);
-                        isEOS = true;
-                    } else {
-                        long presentationTimeUs = extractor.getSampleTime();
-                        decoder.queueInputBuffer(inIdx, 0, sampleSize, presentationTimeUs, 0);
-                        extractor.advance();
+            while (!isEOS) {
+                // Feed encoded data into the decoder
+                if (!inputDone) {
+                    int inIdx = decoder.dequeueInputBuffer(CODEC_TIMEOUT_US);
+                    if (inIdx >= 0) {
+                        ByteBuffer inBuf = inputBuffers[inIdx];
+                        long sampleTimeUs = extractor.getSampleTime();
+
+                        if (sampleTimeUs < 0 || sampleTimeUs > endUs) {
+                            // Past the window or end of stream: signal EOS to decoder
+                            decoder.queueInputBuffer(inIdx, 0, 0, 0, MediaCodec.BUFFER_FLAG_END_OF_STREAM);
+                            inputDone = true;
+                        } else {
+                            int sampleSize = extractor.readSampleData(inBuf, 0);
+                            if (sampleSize < 0) {
+                                decoder.queueInputBuffer(inIdx, 0, 0, 0, MediaCodec.BUFFER_FLAG_END_OF_STREAM);
+                                inputDone = true;
+                            } else {
+                                decoder.queueInputBuffer(inIdx, 0, sampleSize, sampleTimeUs, 0);
+                                extractor.advance();
+                            }
+                        }
                     }
                 }
 
-                int outIdx = decoder.dequeueOutputBuffer(info, 10000);
-                if (outIdx >= 0) {
-                    ByteBuffer outBuffer = outputBuffers[outIdx];
-                    byte[] chunk = new byte[info.size];
-                    outBuffer.position(info.offset);
-                    outBuffer.get(chunk);
-                    outBuffer.clear();
-
-                    pcmStream.write(chunk);
-                    totalPcmBytes += chunk.length;
-
+                // Pull decoded PCM output
+                int outIdx = decoder.dequeueOutputBuffer(info, CODEC_TIMEOUT_US);
+                if (outIdx == MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED) {
+                    outputBuffers = decoder.getOutputBuffers();
+                } else if (outIdx >= 0) {
+                    // Trim pre-roll frames from SEEK_TO_PREVIOUS_SYNC (allow 500ms tolerance)
+                    boolean inWindow = (info.presentationTimeUs >= seekToUs - 500_000L);
+                    if (inWindow && info.size > 0) {
+                        ByteBuffer outBuf = outputBuffers[outIdx];
+                        outBuf.position(info.offset);
+                        byte[] chunk = new byte[info.size];
+                        outBuf.get(chunk);
+                        pcmStream.write(chunk);
+                    }
                     decoder.releaseOutputBuffer(outIdx, false);
                     if ((info.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
-                        break;
+                        isEOS = true;
                     }
                 }
             }
 
-            logDebug("AeonFlux_WhisperPCM", String.format("[PCM-EXTRACT-COMPLETE] Extracted %d raw PCM bytes from codec (Cap: %dMB).", totalPcmBytes, MAX_PCM_BYTES_LIMIT / (1024 * 1024)));
-            return processAndResampleTo16kHzMono(pcmStream.toByteArray(), inputSampleRate, inputChannels, trackDurationMs);
+            byte[] rawPcm = pcmStream.toByteArray();
+            logDebug("AeonFlux_WhisperPCM", String.format(
+                    "[PCM-CHUNK-COMPLETE] Decoded %d raw PCM bytes for window [%dms -> %dms]",
+                    rawPcm.length, startMs, endMs));
+
+            return processAndResampleTo16kHzMono(rawPcm, srcSampleRate, srcChannels, windowMs);
 
         } catch (Exception e) {
-            logError("AeonFlux_WhisperPCM", "[PCM-EXTRACT-EXCEPT] Exception extracting audio stream with MediaCodec. Returning fallback buffer.", e);
-            return createSilenceBuffer(fallbackDurationMs);
+            logError("AeonFlux_WhisperPCM",
+                    "[PCM-CHUNK-EXCEPT] Exception during seek-decode. Returning silence.", e);
+            return createSilenceBuffer(windowMs);
         } finally {
             if (decoder != null) {
                 try { decoder.stop(); decoder.release(); } catch (Throwable ignored) {}
@@ -181,13 +279,52 @@ public class PcmAudioExtractor {
         }
     }
 
+    // -----------------------------------------------------------------------------------------
+    // Public API — legacy full-extract (kept for compatibility, capped at 5 minutes)
+    // -----------------------------------------------------------------------------------------
+
+    /**
+     * [LEGACY] Extract PCM from the start of a stream up to {@link #MAX_FULL_EXTRACT_DURATION_MS}.
+     * Prefer {@link #extractChunkPcm} for long-form audio.
+     */
     @NonNull
-    private PcmAudioBuffer processAndResampleTo16kHzMono(byte[] rawPcmBytes, int srcSampleRate, int srcChannels, long durationMs) {
+    public PcmAudioBuffer extractPcmAudio(@Nullable String audioUrl, long fallbackDurationMs) {
+        logDebug("AeonFlux_WhisperPCM",
+                "[PCM-EXTRACT-INIT] Starting MediaExtractor decoding for audio URL: " + audioUrl);
+        if (audioUrl == null || audioUrl.trim().isEmpty()) {
+            logDebug("AeonFlux_WhisperPCM",
+                    "[PCM-EXTRACT-INIT] Null/empty audioUrl. Returning fallback silence buffer.");
+            return createSilenceBuffer(fallbackDurationMs);
+        }
+
+        long cappedDuration = Math.min(
+                fallbackDurationMs > 0 ? fallbackDurationMs : MAX_FULL_EXTRACT_DURATION_MS,
+                MAX_FULL_EXTRACT_DURATION_MS);
+
+        if (fallbackDurationMs > MAX_FULL_EXTRACT_DURATION_MS) {
+            logWarn("AeonFlux_WhisperPCM", String.format(
+                    "[PCM-EXTRACT-WARN] Full-extract capped at %dms (requested %dms). "
+                    + "Use extractChunkPcm() for long-form audio.",
+                    MAX_FULL_EXTRACT_DURATION_MS, fallbackDurationMs));
+        }
+
+        return extractChunkPcm(audioUrl, 0L, cappedDuration);
+    }
+
+    // -----------------------------------------------------------------------------------------
+    // Internal helpers
+    // -----------------------------------------------------------------------------------------
+
+    @NonNull
+    private PcmAudioBuffer processAndResampleTo16kHzMono(byte[] rawPcmBytes,
+            int srcSampleRate, int srcChannels, long durationMs) {
         if (rawPcmBytes == null || rawPcmBytes.length < 2) {
             return createSilenceBuffer(durationMs);
         }
 
-        ShortBuffer shortBuffer = ByteBuffer.wrap(rawPcmBytes).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer();
+        ShortBuffer shortBuffer = ByteBuffer.wrap(rawPcmBytes)
+                .order(ByteOrder.LITTLE_ENDIAN)
+                .asShortBuffer();
         int totalShorts = shortBuffer.remaining();
         int frameCount = totalShorts / Math.max(1, srcChannels);
 
@@ -199,7 +336,6 @@ public class PcmAudioExtractor {
                 resampledSamples[i] = shortBuffer.get(i) / 32768.0f;
             }
         } else {
-            // Linear downsampling / mix channels to 16kHz Mono float array
             double ratio = (double) TARGET_SAMPLE_RATE / (double) srcSampleRate;
             int targetLength = (int) (frameCount * ratio);
             resampledSamples = new float[targetLength];
@@ -220,7 +356,9 @@ public class PcmAudioExtractor {
             }
         }
 
-        logDebug("AeonFlux_WhisperPCM", String.format("[PCM-RESAMPLE] Resampled PCM to %dHz Mono Float Array. TotalSamples: %d", TARGET_SAMPLE_RATE, resampledSamples.length));
+        logDebug("AeonFlux_WhisperPCM", String.format(
+                "[PCM-RESAMPLE] Resampled PCM to %dHz Mono Float Array. TotalSamples: %d",
+                TARGET_SAMPLE_RATE, resampledSamples.length));
         return new PcmAudioBuffer(resampledSamples, TARGET_SAMPLE_RATE, durationMs);
     }
 

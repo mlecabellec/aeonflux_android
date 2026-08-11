@@ -12,7 +12,7 @@ import androidx.annotation.Nullable;
 
 import com.aeonflux.app.core.media.AudioSilenceDetector;
 import com.aeonflux.app.core.media.AudioSilenceDetector.AudioSegment;
-import com.aeonflux.app.core.media.whisper.PcmAudioExtractor.PcmAudioBuffer;
+import com.aeonflux.app.core.media.whisper.PcmAudioExtractor.PcmAudioBuffer; // used for per-chunk decode result
 import com.aeonflux.app.ui.AudioPlaybackActivity.AudioTranscriptLine;
 
 import java.util.ArrayList;
@@ -134,24 +134,43 @@ public class WhisperTranscriptEngine {
         try {
             long maxTime = durationMs > 0 ? durationMs : 300000L;
 
-            // STEP 1: Extract 16kHz Float PCM Audio from media stream
-            PcmAudioBuffer pcmBuffer = pcmExtractor.extractPcmAudio(audioUrl, maxTime);
-            logDebug("AeonFlux_Whisper_Diag", String.format(Locale.US, "[WHISPER-PCM-DIAG] Extracted %d float PCM audio samples (SampleRate: %dHz, Duration: %dms)",
-                    pcmBuffer.getSampleCount(), pcmBuffer.sampleRate, pcmBuffer.durationMs));
+            // STEP 1: Run AudioSilenceDetector VAD pipeline on the full duration timeline.
+            // A synthetic silence buffer is used solely to produce time boundaries — no audio
+            // data is pre-buffered here, avoiding the former 16MB memory cap.
+            List<AudioSegment> vadSegments = silenceDetector.detectSentencesAndSplit(maxTime);
+            logDebug("AeonFlux_Whisper_Diag", String.format(Locale.US,
+                    "[WHISPER-VAD-PIPELINE] VAD segmenter generated %d audio chunks across %dms timeline.",
+                    vadSegments.size(), maxTime));
 
-            // STEP 2: Run AudioSilenceDetector VAD pipeline on PCM timeline
-            List<AudioSegment> vadSegments = silenceDetector.detectSentencesAndSplit(pcmBuffer.durationMs);
-            logDebug("AeonFlux_Whisper_Diag", String.format(Locale.US, "[WHISPER-VAD-PIPELINE] VAD sentence segmenter generated %d audio chunks across %dms timeline.",
-                    vadSegments.size(), pcmBuffer.durationMs));
-
-            // STEP 3: Pass VAD PCM Audio Chunks to Whisper Base Model for French C++ JNI STT Decoding
-            String searchKey = (audioUrl != null ? audioUrl.toLowerCase() : "") + " " + (audioTitle != null ? audioTitle.toLowerCase() : "");
+            // STEP 2: Per-chunk seek-and-decode via PcmAudioExtractor, then Whisper inference.
+            // Each chunk opens MediaExtractor, seeks to startMs, decodes only the bounded window,
+            // and releases immediately — peak heap usage is proportional to one chunk, not the
+            // full file duration.
+            String searchKey = (audioUrl != null ? audioUrl.toLowerCase() : "")
+                    + " " + (audioTitle != null ? audioTitle.toLowerCase() : "");
             int maxSegmentsToProcess = Math.min(vadSegments.size(), 30);
 
             for (int i = 0; i < maxSegmentsToProcess; i++) {
                 AudioSegment segment = vadSegments.get(i);
 
-                float[] chunkSamples = extractChunkPcmSamples(pcmBuffer, segment.startMs, segment.endMs);
+                // Guard: VAD segments must not exceed the extractor's hard chunk limit.
+                // extractChunkPcm() will clamp internally, but we surface the anomaly here too.
+                long segmentDurationMs = segment.endMs - segment.startMs;
+                if (segmentDurationMs > PcmAudioExtractor.MAX_CHUNK_DURATION_MS) {
+                    logDebug("AeonFlux_Whisper_Diag", String.format(Locale.US,
+                            "[WHISPER-CHUNK-OVERSIZE #%03d] VAD segment %dms > MAX_CHUNK_DURATION_MS (%dms). "
+                            + "Extractor will clamp to [%dms -> %dms].",
+                            i, segmentDurationMs, PcmAudioExtractor.MAX_CHUNK_DURATION_MS,
+                            segment.startMs, segment.startMs + PcmAudioExtractor.MAX_CHUNK_DURATION_MS));
+                }
+
+                // Seek-decode only the [startMs, endMs] window for this chunk
+                PcmAudioBuffer chunkBuffer = pcmExtractor.extractChunkPcm(audioUrl, segment.startMs, segment.endMs);
+                logDebug("AeonFlux_Whisper_Diag", String.format(Locale.US,
+                        "[WHISPER-CHUNK-PCM #%03d] Decoded %d samples for [%dms -> %dms]",
+                        i, chunkBuffer.getSampleCount(), segment.startMs, segment.endMs));
+
+                float[] chunkSamples = chunkBuffer.samples;
                 String decodedSpeechText = decodeWhisperChunkText(searchKey, audioTitle, selectedLanguageTag, i, segment, chunkSamples);
 
                 String lineText = (decodedSpeechText != null && !decodedSpeechText.trim().isEmpty())
@@ -184,23 +203,6 @@ public class WhisperTranscriptEngine {
     @NonNull
     public List<AudioTranscriptLine> generateTranscriptForAudio(@Nullable String audioUrl, long durationMs) {
         return generateTranscriptForAudio(audioUrl, null, durationMs);
-    }
-
-    @NonNull
-    private float[] extractChunkPcmSamples(@NonNull PcmAudioBuffer pcmBuffer, long startMs, long endMs) {
-        if (pcmBuffer.samples == null || pcmBuffer.samples.length == 0) {
-            return new float[0];
-        }
-        int startSample = (int) ((startMs / 1000.0) * pcmBuffer.sampleRate);
-        int endSample = (int) ((endMs / 1000.0) * pcmBuffer.sampleRate);
-
-        startSample = Math.max(0, Math.min(startSample, pcmBuffer.samples.length));
-        endSample = Math.max(startSample, Math.min(endSample, pcmBuffer.samples.length));
-
-        int length = endSample - startSample;
-        float[] chunk = new float[length];
-        System.arraycopy(pcmBuffer.samples, startSample, chunk, 0, length);
-        return chunk;
     }
 
     /**
